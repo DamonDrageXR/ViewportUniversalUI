@@ -8,15 +8,18 @@ the field, desktop review tools, and headset builds.
 ```
 system/       the engine, shared by every system:
               base.css · components.css · stage.css/js · nav.css/js
-              tiles.css/js · inspector.css/js · use-tokens.js
+              tiles.css/js · inspector.css/js · use-tokens.js · icons.js
               schema.json — what a system contains and how it may be edited
-              preview.html — the living style guide (?system=<id>)
+              preview.html — the elements page (?system=<id>&view=elements)
 systems/      one folder per system VERSION:
               <family>-v<n>/system.json   globals + explicit overrides
               <family>-v<n>/tokens.css    GENERATED — never hand-edit
               <family>-v<n>/mockups/<family>-v<n>/{index.html, mockup.json}
               manifest.js — GENERATED index
-studio/       the editing app (needs the server): index.html · system.html
+studio/       the editing app (needs the server):
+              index.html   tile view 1 — systems
+              mockups.html tile view 2 — mockups, re-renderable with any system
+              system.html  one system: Settings → Elements → Mockups
 templates/    mockup.html
 tools/        studio.mjs · new-mockup.mjs · reindex.mjs · audit.mjs
               lib/system.mjs (derivation + file ops) · lib/color.mjs
@@ -54,6 +57,29 @@ Ids are `<family>-v<n>` for both systems and mockups. "New version" copies
 forward and leaves the source untouched. Nothing but an explicit delete ever
 removes a version. Keep it that way — the whole point is being able to see
 iterations side by side.
+
+## Two views, one page per system
+
+**Systems** (`studio/index.html`) is the design language — the settings and the
+elements they produce. **Mockups** (`studio/mockups.html`) is what that language
+looks like on a device; it can re-render every mockup with any system via
+`?system=<id>`, which is how a palette change gets judged on real screens.
+
+A system's own page reads top to bottom: **Settings → Elements → Mockups**.
+Elements is an iframe of `system/preview.html?view=elements` with the draft
+tokens injected, so it is the real page, interactive, not a picture of one.
+
+## Icons
+
+`system/icons.js` injects one inline SVG sprite. Use:
+
+```html
+<svg class="vp-icon" aria-hidden="true"><use href="#i-measure"></use></svg>
+```
+
+Icons carry no stroke-width of their own so they inherit `--stroke-icon`, which
+means raising a system's line weight thickens them along with every border. Add
+a new icon to the `PATHS` map — 24px grid, stroke only, no fills.
 
 ## Adding an editable token
 

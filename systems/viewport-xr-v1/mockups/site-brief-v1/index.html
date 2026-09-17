@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Site brief — Viewport Universal UI</title>
+
+<!-- Four levels up: mockups live at systems/<system>/mockups/<mockup>/index.html.
+     tokens.css is not linked directly — use-tokens.js resolves which
+     system this mockup renders with, so ?system=<id> can retarget it. -->
+<script src="../../../../systems/manifest.js"></script>
+<script src="../../../../system/use-tokens.js"></script>
+<link rel="stylesheet" href="../../../../system/base.css">
+<link rel="stylesheet" href="../../../../system/components.css">
+<link rel="stylesheet" href="../../../../system/stage.css">
+<link rel="stylesheet" href="../../../../system/nav.css">
+<link rel="stylesheet" href="../../../../system/inspector.css">
+
+<style>
+  /* iPad portrait: held in two hands, read like a document. The scene takes
+     the top half, the detail stacks beneath it — the opposite of landscape,
+     where panels flank the scene. */
+  .br {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1.15fr) minmax(0, 1fr);
+    width: 100%;
+    height: 100%;
+    padding: var(--space-4);
+    gap: var(--space-4);
+  }
+
+  .br__bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface-glass-strong);
+    backdrop-filter: blur(var(--blur-panel));
+    border: var(--stroke-hairline) solid var(--border-default);
+    border-radius: var(--radius-lg);
+  }
+
+  .br__title { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .br__project { font-size: var(--text-lg); font-weight: var(--weight-semibold); }
+  .br__sub { font-size: var(--text-xs); color: var(--text-muted); }
+
+  .br__scene { position: relative; display: flex; align-items: flex-end; padding: var(--space-3); }
+
+  .br__legend {
+    display: flex;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: var(--surface-glass);
+    backdrop-filter: blur(var(--blur-panel));
+    border: var(--stroke-hairline) solid var(--border-default);
+    border-radius: var(--radius-pill);
+  }
+
+  .br__lower { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); min-height: 0; }
+
+  .br__stats { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: var(--space-4); }
+</style>
+</head>
+
+<body>
+<main class="stage">
+
+  <header class="stage__header">
+    <h1 class="stage__title">Site brief — iPad portrait</h1>
+    <p class="stage__meta">Target: iPad Pro · portrait · 1024×1366 · Status: draft · Updated 2026-09-17</p>
+  </header>
+
+  <!-- The control bar is injected here by stage.js -->
+
+  <section class="stage__notes">
+    <h2>Intent</h2>
+    <p>
+      The consultation view — an iPad held in two hands and turned toward someone else. Reads
+      like a document rather than a tool: what is proposed, where, and what it affects.
+    </p>
+    <h2>Why it is built this way</h2>
+    <ul>
+      <li>Portrait stacks scene over detail. Landscape flanks the scene with panels; the same layout rotated would waste the width.</li>
+      <li>No tool rail — this view is for showing, not editing. Editing lives in the landscape layout.</li>
+      <li>The legend sits over the scene rather than beside it, so the render stays the full width of the device.</li>
+    </ul>
+    <h2>Open questions</h2>
+    <ul>
+      <li>Should the lower half be swipeable between Layers, Heritage and Measurements, rather than a fixed split?</li>
+      <li>Does the stat block belong here, or is it detail that only matters in the office?</li>
+    </ul>
+  </section>
+
+  <div class="device device--ipad-portrait" data-device="iPad Pro · portrait · 1024×1366">
+    <div class="device__scene"></div>
+    <div class="device__ui">
+
+      <!-- ===== Mockup starts here ===== -->
+      <div class="br">
+
+        <header class="br__bar">
+          <svg class="vp-icon vp-icon--lg" aria-hidden="true" style="color:var(--accent)"><use href="#i-layers"></use></svg>
+          <span class="br__title u-grow">
+            <span class="br__project u-truncate">Wyloo North — Stage 2</span>
+            <span class="br__sub">Primary approvals footprint · revised 14 Sep</span>
+          </span>
+          <span class="vp-badge vp-badge--caution">Draft</span>
+          <div class="vp-segmented">
+            <button class="vp-segmented__option" type="button" aria-pressed="true">Plan</button>
+            <button class="vp-segmented__option" type="button" aria-pressed="false">AR</button>
+          </div>
+          <button class="vp-tool" type="button" aria-label="Share" style="width:var(--hit-min);height:var(--hit-min)">
+            <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-share"></use></svg>
+          </button>
+        </header>
+
+        <div class="br__scene">
+          <div class="br__legend">
+            <span class="vp-badge"><span class="vp-tree__swatch" style="background:var(--status-critical)"></span>Pit</span>
+            <span class="vp-badge"><span class="vp-tree__swatch" style="background:var(--status-caution)"></span>Waste</span>
+            <span class="vp-badge"><span class="vp-tree__swatch" style="background:var(--accent)"></span>Roads</span>
+            <span class="vp-badge"><span class="vp-tree__swatch" style="background:var(--status-positive)"></span>Vegetation</span>
+          </div>
+        </div>
+
+        <div class="br__lower">
+
+          <section class="vp-panel">
+            <div class="vp-panel__header">
+              <h2 class="vp-panel__title">What is proposed</h2>
+            </div>
+            <div class="vp-panel__body">
+              <div class="br__stats">
+                <div class="vp-readout">
+                  <span class="vp-readout__label">Footprint</span>
+                  <span class="vp-readout__value">412 ha</span>
+                </div>
+                <div class="vp-readout">
+                  <span class="vp-readout__label">Max depth</span>
+                  <span class="vp-readout__value">180 m</span>
+                </div>
+                <div class="vp-readout">
+                  <span class="vp-readout__label">Haul road</span>
+                  <span class="vp-readout__value">14.2 km</span>
+                </div>
+                <div class="vp-readout">
+                  <span class="vp-readout__label">Stages</span>
+                  <span class="vp-readout__value">3</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="vp-panel">
+            <div class="vp-panel__header">
+              <h2 class="vp-panel__title">Values in view</h2>
+              <span class="u-spacer"></span>
+              <span class="vp-badge vp-badge--accent">6</span>
+            </div>
+            <div class="vp-panel__body vp-panel__body--tight u-scroll">
+              <div class="vp-tree" role="tree" aria-label="Values in view">
+                <div class="vp-tree__row" role="treeitem" style="--depth:0">
+                  <span class="vp-tree__swatch" style="background:var(--status-positive)"></span>
+                  <span class="u-grow u-truncate">Vegetation survey</span>
+                  <span class="vp-tree__count">2</span>
+                </div>
+                <div class="vp-tree__row" role="treeitem" style="--depth:0">
+                  <span class="vp-tree__swatch" style="background:var(--accent)"></span>
+                  <span class="u-grow u-truncate">Watercourses</span>
+                  <span class="vp-tree__count">3</span>
+                </div>
+                <div class="vp-tree__row" role="treeitem" aria-selected="true" style="--depth:0">
+                  <span class="vp-tree__swatch" style="background:var(--status-caution)"></span>
+                  <span class="u-grow u-truncate">Heritage — recorded</span>
+                  <span class="vp-tree__count">1</span>
+                </div>
+              </div>
+            </div>
+            <div class="vp-panel__footer">
+              <button class="vp-btn vp-btn--ghost" type="button">
+                <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-info"></use></svg>Details
+              </button>
+              <span class="u-spacer"></span>
+              <button class="vp-btn vp-btn--primary" type="button">Add note</button>
+            </div>
+          </section>
+
+        </div>
+      </div>
+      <!-- ===== Mockup ends here ===== -->
+
+    </div>
+  </div>
+
+</main>
+
+<script src="../../../../system/stage.js" defer></script>
+<script src="../../../../system/icons.js"></script>
+<script src="../../../../system/nav.js" defer></script>
+<script src="../../../../system/inspector.js" defer></script>
+</body>
+</html>

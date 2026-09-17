@@ -17,10 +17,15 @@
 <div class="studio">
 
   <header class="studio__bar">
-    <a class="vp-btn vp-btn--ghost" href="index.html">← Studio</a>
-    <input class="vp-input" id="name" style="width:220px" aria-label="System name">
+    <a class="vp-btn vp-btn--ghost" href="index.html">← Systems</a>
+    <input class="vp-input" id="name" style="width:200px" aria-label="System name">
     <span class="vp-badge" id="version">—</span>
     <span class="dirty-dot" id="dirty" hidden title="Unsaved changes"></span>
+    <nav class="section-jump" aria-label="Jump to section">
+      <a class="vp-btn vp-btn--ghost" href="#settings">Settings</a>
+      <a class="vp-btn vp-btn--ghost" href="#elements">Elements</a>
+      <a class="vp-btn vp-btn--ghost" href="#mockups">Mockups</a>
+    </nav>
     <span class="u-spacer"></span>
     <button class="vp-btn vp-btn--secondary" type="button" data-act="theme">Editing: dark</button>
     <button class="vp-btn vp-btn--secondary" type="button" data-act="save">Save</button>
@@ -29,50 +34,74 @@
   </header>
 
   <main class="studio__main">
-    <div class="editor">
 
-      <div class="editor__col">
+    <!-- ========== 1. SETTINGS ========== -->
+    <section class="stage-section" id="settings">
+      <header class="stage-section__head">
+        <h1>Settings</h1>
+        <p>
+          Universal values for this system. Globals cascade into everything below them —
+          the accent ramp, every surface, all four radius steps, the whole spacing and type
+          scale, the line weights, and the hit-target floors.
+        </p>
+      </header>
 
-        <section class="vp-panel vp-panel--solid globals">
-          <header class="vp-panel__header">
-            <h2 class="vp-panel__title">Global settings</h2>
-            <span class="u-spacer"></span>
-            <span class="vp-badge vp-badge--accent">cascades to everything</span>
-          </header>
-          <div class="vp-panel__body">
-            <p class="field__note" style="margin-bottom:var(--space-4)">
-              Every token below is derived from these. Change one and the whole system moves with it —
-              including the contrast-safe accent fill, which is recomputed so a new brand colour cannot
-              quietly drop a button below 4.5:1.
-            </p>
-            <div class="globals__grid" id="globals"></div>
-          </div>
-        </section>
+      <section class="vp-panel vp-panel--solid globals">
+        <header class="vp-panel__header">
+          <h2 class="vp-panel__title">Global settings</h2>
+          <span class="u-spacer"></span>
+          <span class="vp-badge vp-badge--accent">cascades to everything</span>
+        </header>
+        <div class="vp-panel__body">
+          <p class="field__note" style="margin-bottom:var(--space-4)">
+            The accent fill behind white text and the accent/status text colours are recomputed
+            from these to clear 4.5:1, so a new brand colour cannot quietly drop a control below
+            contrast.
+          </p>
+          <div class="globals__grid" id="globals"></div>
+        </div>
+      </section>
 
-        <div class="u-stack" id="groups"></div>
+      <div class="groups-grid" id="groups"></div>
+    </section>
 
+    <!-- ========== 2. ELEMENTS ========== -->
+    <section class="stage-section" id="elements">
+      <header class="stage-section__head">
+        <h1>Elements</h1>
+        <p>
+          Every component the system produces, live and interactive, with the settings above
+          applied. This is the draft — it updates as you change a setting, before anything is saved.
+        </p>
+      </header>
+
+      <div class="elements-frame">
+        <iframe id="preview" title="Elements preview"></iframe>
+      </div>
+      <p class="field__note">
+        <a id="elements-link" href="#" target="_blank" rel="noopener">Open the elements page on its own ↗</a>
+        — useful for clicking through states at full width.
+      </p>
+    </section>
+
+    <!-- ========== 3. MOCKUPS ========== -->
+    <section class="stage-section" id="mockups">
+      <header class="stage-section__head">
+        <h1>Mockups</h1>
+        <p>
+          How the UI looks on a device, built with this system. Phone, iPad portrait and iPad
+          landscape are the targets that matter; all of them are in the
+          <a href="mockups.html">Mockups</a> view too, where they can be re-rendered with any system.
+        </p>
+      </header>
+
+      <div class="u-row" style="flex-wrap:wrap">
+        <button class="vp-btn vp-btn--primary" type="button" data-act="mockup-new">New mockup</button>
       </div>
 
-      <div class="editor__col editor__sticky">
-        <section class="vp-panel vp-panel--solid">
-          <header class="vp-panel__header">
-            <h2 class="vp-panel__title">Live preview</h2>
-            <span class="u-spacer"></span>
-            <select class="vp-input" id="target" style="width:170px" aria-label="Preview target"></select>
-          </header>
-          <div class="vp-panel__body vp-panel__body--tight">
-            <div class="preview-frame">
-              <iframe id="preview" title="Live preview"></iframe>
-            </div>
-            <p class="field__note" style="margin-top:var(--space-2)">
-              Showing the draft, not what is saved. <strong>Save</strong> writes to this version;
-              <strong>Save as new version</strong> copies it forward and leaves this one as it is.
-            </p>
-          </div>
-        </section>
-      </div>
+      <div class="vp-mockups" id="mockup-tiles" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr))"></div>
+    </section>
 
-    </div>
   </main>
 
 </div>

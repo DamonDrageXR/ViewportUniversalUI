@@ -11,6 +11,10 @@
 <link rel="stylesheet" href="../system/components.css">
 <link rel="stylesheet" href="../system/tiles.css">
 <link rel="stylesheet" href="studio.css">
+<style>
+  .hero { display: flex; flex-direction: column; gap: var(--space-2); }
+  .hero p { color: var(--text-secondary); max-width: 68ch; }
+</style>
 </head>
 
 <body>
@@ -18,13 +22,25 @@
 
   <header class="studio__bar">
     <span class="studio__brand">Viewport UI Studio</span>
-    <button class="vp-btn vp-btn--primary" type="button" data-action="system-new">New system</button>
+    <a class="vp-btn vp-btn--ghost" href="index.html" data-view="systems">Systems</a>
+    <a class="vp-btn vp-btn--ghost" href="mockups.html" data-view="mockups">Mockups</a>
     <span class="u-spacer"></span>
+    <button class="vp-btn vp-btn--primary" type="button" data-action="system-new">New system</button>
     <a class="vp-btn vp-btn--ghost" href="../index.html">Overview</a>
     <a class="vp-btn vp-btn--ghost" href="../docs/how-to-use.html">How to use</a>
   </header>
 
   <main class="studio__main">
+    <header class="hero">
+      <h1>Systems</h1>
+      <p>
+        A system is the design language — the palette, the type and spacing scales, the line
+        weights, and how every button, slider, icon and menu behaves. Open one to configure it
+        and see the elements it produces. Mockups built with it live in the
+        <a href="mockups.html">Mockups</a> view.
+      </p>
+    </header>
+
     <section class="u-stack" id="systems">
       <p class="vp-empty">Loading…</p>
     </section>
@@ -72,9 +88,11 @@
 
   const load = async () => {
     const { systems } = await api("GET", "/state");
+    window.__systems = systems;
     render(systems.map((s) => ({
       ...s,
       accent: s.resolved.dark["--accent"],
+      lineWeight: s.globals?.lineWeight ?? 1,
       surfaces: [
         s.resolved.dark["--surface-0"], s.resolved.dark["--surface-1"],
         s.resolved.dark["--surface-2"], s.resolved.dark["--surface-raised"],
@@ -111,7 +129,8 @@
       }
 
       if (action === "system-delete") {
-        const mockups = find(id)?.querySelectorAll(".vp-mockup").length ?? 0;
+        const sys = (window.__systems ?? []).find((x) => x.id === id);
+        const mockups = sys?.mockups?.length ?? 0;
         if (!confirmDelete(`system "${nameOf(id)}"`,
           `${id}${mockups ? ` and its ${mockups} mockup${mockups === 1 ? "" : "s"}` : ""}`)) return;
         await api("DELETE", `/systems/${id}`);
@@ -120,33 +139,8 @@
         return;
       }
 
-      if (action === "mockup-new") {
-        const title = ask("Title for the new mockup", "New mockup");
-        if (!title) return;
-        const device = ask(
-          "Device: ipad-landscape, ipad-portrait, desktop, desktop-wide, headset, phone",
-          "ipad-landscape");
-        if (!device) return;
-        const created = await api("POST", `/systems/${id}/mockups`, { title, device });
-        toast(`Created ${created.id}`, "vp-badge--positive");
-        await load();
-        return;
-      }
 
-      if (action === "mockup-version") {
-        const created = await api("POST", `/systems/${system}/mockups/${id}/version`);
-        toast(`${created.id} created from ${created.derivedFrom}`, "vp-badge--positive");
-        await load();
-        return;
-      }
 
-      if (action === "mockup-delete") {
-        if (!confirmDelete("mockup", `${id} in ${system}`)) return;
-        await api("DELETE", `/systems/${system}/mockups/${id}`);
-        toast(`Deleted ${id}`);
-        await load();
-        return;
-      }
     } catch (err) {
       fail(err);
     }

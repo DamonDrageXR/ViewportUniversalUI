@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockups — Viewport Universal UI</title>
+
+<script src="../systems/manifest.js"></script>
+<script src="../system/use-tokens.js"></script>
+<link rel="stylesheet" href="../system/base.css">
+<link rel="stylesheet" href="../system/components.css">
+<link rel="stylesheet" href="../system/tiles.css">
+<link rel="stylesheet" href="studio.css">
+<style>
+  .hero { display: flex; flex-direction: column; gap: var(--space-2); }
+  .hero p { color: var(--text-secondary); max-width: 68ch; }
+  .render-as {
+    display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap;
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface-1);
+    border: var(--stroke-hairline) solid var(--border-default);
+    border-radius: var(--radius-md);
+  }
+</style>
+</head>
+
+<body>
+<div class="studio">
+
+  <header class="studio__bar">
+    <span class="studio__brand">Viewport UI Studio</span>
+    <a class="vp-btn vp-btn--ghost" href="index.html">Systems</a>
+    <a class="vp-btn vp-btn--secondary" href="mockups.html" aria-current="page">Mockups</a>
+    <span class="u-spacer"></span>
+    <button class="vp-btn vp-btn--primary" type="button" data-action="mockup-new">New mockup</button>
+  </header>
+
+  <main class="studio__main">
+
+    <header class="hero">
+      <h1>Mockups</h1>
+      <p>
+        How the UI actually looks on a device. Each mockup is built with a system; pick a
+        different one below and every mockup re-renders with its tokens, so you can see a
+        palette or density change on real screens before committing to it.
+      </p>
+    </header>
+
+    <div class="render-as">
+      <label class="vp-field__label" for="render-as">Render everything with</label>
+      <select class="vp-input" id="render-as" style="width:280px"></select>
+      <span class="vp-badge" id="render-note">each mockup's own system</span>
+      <span class="u-spacer"></span>
+      <label class="vp-toggle">
+        <input type="checkbox" id="group-device">
+        <span class="vp-toggle__track"><span class="vp-toggle__thumb"></span></span>
+        Group by device
+      </label>
+    </div>
+
+    <section class="u-stack" id="mockups">
+      <p class="vp-empty">Loading…</p>
+    </section>
+
+  </main>
+
+</div>
+
+<script src="../system/tiles.js"></script>
+<script src="studio.js"></script>
+<script>
+(() => {
+  "use strict";
+  const { api, confirmDelete, toast, fail, ask } = window.Studio;
+
+  const host = document.getElementById("mockups");
+  const selector = document.getElementById("render-as");
+  const note = document.getElementById("render-note");
+  const groupToggle = document.getElementById("group-device");
+
+  const DEVICE_LABEL = {
+    phone: "Phone",
+    "ipad-portrait": "iPad — portrait",
+    "ipad-landscape": "iPad — landscape",
+    desktop: "Desktop",
+    "desktop-wide": "Desktop — wide",
+    headset: "Headset",
+  };
+
+  let systems = [];
+  let renderAs = "";
+
+  const flat = () => systems.flatMap((s) =>
+    (s.mockups ?? []).map((m) => ({ ...m, systemId: s.id, systemName: `${s.name} v${s.version}` })));
+
+  const tiles = (items) => items.map((m) => VPTiles.mockupTile(m, {
+    base: "../",
+    systemId: m.systemId,
+    systemName: m.systemName,
+    renderAs,
+    actions: true,
+  })).join("");
+
+  const group = (items, keyOf, labelOf) => {
+    const map = new Map();
+    for (const m of items) {
+      const k = keyOf(m);
+      if (!map.has(k)) map.set(k, []);
+      map.get(k).push(m);
+    }
+    return [...map.entries()].map(([k, list]) => `
+      <section class="vp-tiles__group">
+        <header class="vp-tiles__grouphead">
+          <h2>${VPTiles.esc(labelOf(k, list))}</h2>
+          <span class="vp-badge">${list.length}</span>
+        </header>
+        <div class="vp-mockups" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr))">
+          ${tiles(list)}
+        </div>
+      </section>`).join("");
+  };
+
+  const render = () => {
+    const items = flat();
+    if (!items.length) {
+      host.innerHTML =
+        '<p class="vp-empty">No mockups yet. <strong>New mockup</strong> above creates one in a system.</p>';
+      return;
+    }
+    host.innerHTML = groupToggle.checked
+      ? group(items, (m) => m.device, (k) => DEVICE_LABEL[k] ?? k)
+      : group(items, (m) => m.systemId, (k, list) => list[0].systemName);
+  };
+
+  const load = async () => {
+    const state = await api("GET", "/state");
+    systems = state.systems;
+
+    selector.innerHTML =
+      `<option value="">Each mockup's own system</option>` +
+      systems.map((s) => `<option value="${VPTiles.esc(s.id)}">${VPTiles.esc(s.name)} v${s.version}</option>`).join("");
+    selector.value = renderAs;
+
+    render();
+  };
+
+  selector.addEventListener("change", () => {
+    renderAs = selector.value;
+    note.textContent = renderAs || "each mockup's own system";
+    note.className = renderAs ? "vp-badge vp-badge--accent" : "vp-badge";
+    render();
+  });
+
+  groupToggle.addEventListener("change", render);
+
+  document.addEventListener("click", async (e) => {
+    const btn = e.target.closest("[data-action]");
+    if (!btn) return;
+    const { action, id, system } = btn.dataset;
+
+    try {
+      if (action === "mockup-new") {
+        if (!systems.length) { toast("Create a system first", "vp-badge--caution"); return; }
+        const title = ask("Title for the new mockup", "New mockup");
+        if (!title) return;
+        const sysId = systems.length === 1
+          ? systems[0].id
+          : ask(`Which system?  ${systems.map((s) => s.id).join(", ")}`, systems[0].id);
+        if (!sysId) return;
+        const device = ask(
+          "Device: phone, ipad-portrait, ipad-landscape, desktop, desktop-wide, headset",
+          "ipad-landscape");
+        if (!device) return;
+        const created = await api("POST", `/systems/${sysId}/mockups`, { title, device });
+        toast(`Created ${created.id}`, "vp-badge--positive");
+        await load();
+        return;
+      }
+
+      if (action === "mockup-version") {
+        const created = await api("POST", `/systems/${system}/mockups/${id}/version`);
+        toast(`${created.id} created from ${created.derivedFrom}`, "vp-badge--positive");
+        await load();
+        return;
+      }
+
+      if (action === "mockup-delete") {
+        if (!confirmDelete("mockup", `${id} in ${system}`)) return;
+        await api("DELETE", `/systems/${system}/mockups/${id}`);
+        toast(`Deleted ${id}`);
+        await load();
+        return;
+      }
+    } catch (err) {
+      fail(err);
+    }
+  });
+
+  load().catch((err) => {
+    host.innerHTML =
+      '<p class="vp-empty">Could not reach the studio server. Start it with <code>npm run studio</code>.</p>';
+    console.error(err);
+  });
+})();
+</script>
+</body>
+</html>

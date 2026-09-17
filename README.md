@@ -19,19 +19,33 @@ The studio is where you create, edit, version and delete. It writes real files
 into `systems/`, so everything you do is in git, diffs like anything else, and
 is still there next session.
 
-## What you can do in the studio
+## Two views
 
-**Tile view** of every system, grouped by family so versions read as a run.
-Each tile shows the system's palette, its mockups as live thumbnails, and
-buttons for New version / New mockup / Delete.
+**Systems** — the design language. Palette, fonts, line weights, corner radius,
+spacing, type scale, density, and every element those produce: buttons, sliders,
+icons, menus, panels, trees.
 
-**System editor** with global settings at the top and every token below.
-Change a global and the whole system moves with it, live.
+**Mockups** — what that language looks like on a device. Phone, iPad portrait,
+iPad landscape. Pick a different system at the top and every mockup re-renders
+with it, so a palette or density change can be judged on real screens before
+you commit to it.
 
-**Click-to-edit** — open a mockup, hit **Inspect**, click anything. It tells
-you which tokens that element actually resolves to and gives you the right
-control for each: a colour picker for a colour, a slider for a radius, a font
-picker for a font. Edits apply live and save back to the system.
+## A system reads top to bottom
+
+Open one and you get three sections in order:
+
+1. **Settings** — globals first, then every token, each group offering only the
+   control its type allows.
+2. **Elements** — the live, interactive component library with those settings
+   applied. Not a picture: the real page, embedded.
+3. **Mockups** — the device mockups built with this system.
+
+## Click-to-edit
+
+Open a mockup, hit **Inspect**, click anything. It tells you which tokens that element
+actually resolves to and gives you the right control for each: a colour picker
+for a colour, a slider for a radius, a font picker for a font. Edits apply live
+and save back to the system.
 
 ## Nothing overwrites anything
 
@@ -54,7 +68,9 @@ accent and theme combinations across the full hue circle stays above AA.
 
 Density works the same way: switch a system to **Field** and every hit target
 in every mockup jumps to 56/64/72px, because that is what gloves and sun and
-ray targeting need.
+ray targeting need. **Line weight** likewise drives every border, divider and
+icon stroke from one number, so icons thicken with the rest of the system
+instead of drifting thin against heavier borders.
 
 ## Editors are constrained by type
 
@@ -67,10 +83,10 @@ schema adds it to the studio with no code change.
 
 ```
 system/       the engine shared by every system — components, staging chrome,
-              nav, tiles, inspector, and schema.json
+              nav, tiles, inspector, icons, and schema.json
 systems/      one folder per system version: system.json (globals + overrides),
               a GENERATED tokens.css, and that system's mockups
-studio/       the editing app
+studio/       the editing app — systems view, mockups view, system page
 tools/        studio server, scaffolder, reindexer, audit
 index.html    the read-only overview
 ```

@@ -99,6 +99,21 @@ export const deriveShared = (g, schema) => {
   out["--radius-xl"] = px(r * 2.75);
   out["--radius-pill"] = "999px";
 
+  /* Line weights. Icons take their SVG stroke-width from the same global, so
+     turning the system heavier thickens the icons with it instead of leaving
+     them looking spindly against the new borders. */
+  const w = Number(g.lineWeight ?? 1);
+  const half = (n) => `${Math.round(n * 2) / 2}px`;
+  // Hairline IS the line weight, not half of it. It is the border on nearly
+  // every component, so if it barely moves the control feels broken — and
+  // browsers round a 1.5px border back down to 1px anyway, which made the
+  // first half of the range do visibly nothing.
+  out["--stroke-hairline"] = half(w);
+  out["--stroke-thin"] = half(w * 1.5);
+  out["--stroke-regular"] = half(w * 2);
+  out["--stroke-thick"] = half(w * 3);
+  out["--stroke-icon"] = half(w * 1.6);
+
   const base = Number(g.baseFontSize), ratio = Number(g.typeScale);
   for (const [token, step] of Object.entries(TYPE_STEPS)) {
     out[token] = px(Math.max(10, base * ratio ** step));

@@ -53,26 +53,57 @@
   align-items: center;
 }
 
-/* ---- Editor layout ------------------------------------------------------- */
-.editor {
+/* ---- Editor layout -------------------------------------------------------
+   One document: settings, then the elements they produce, then the mockups
+   those elements build. Read top to bottom. */
+.stage-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-top: var(--space-6);
+  scroll-margin-top: 80px;
+}
+
+.stage-section + .stage-section {
+  border-top: var(--stroke-hairline) solid var(--border-subtle);
+  margin-top: var(--space-5);
+}
+
+.stage-section__head { display: flex; flex-direction: column; gap: var(--space-2); }
+.stage-section__head h1 { font-size: var(--text-2xl); }
+.stage-section__head p { color: var(--text-secondary); max-width: 74ch; font-size: var(--text-sm); }
+
+.section-jump { display: flex; gap: var(--space-1); }
+
+@media (max-width: 900px) {
+  .section-jump { display: none; }
+}
+
+/* Token groups read in columns — the settings block stays short enough that
+   the elements below it are reachable without a long scroll. */
+.groups-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
-  gap: var(--space-5);
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-4);
   align-items: start;
 }
 
-@media (max-width: 1100px) {
-  .editor { grid-template-columns: minmax(0, 1fr); }
+.elements-frame {
+  height: 80vh;
+  min-height: 560px;
+  border: var(--stroke-hairline) solid var(--border-default);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--surface-0);
+  resize: vertical;
 }
 
-.editor__col { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
-
-.editor__sticky { position: sticky; top: 76px; }
+.elements-frame iframe { width: 100%; height: 100%; border: 0; display: block; }
 
 /* Globals sit at the top and are visually separated, because changing one
    cascades through every token below. */
 .globals {
-  border: 1px solid var(--accent);
+  border: var(--stroke-hairline) solid var(--accent);
   box-shadow: 0 0 0 3px var(--accent-quiet);
 }
 
@@ -120,7 +151,7 @@
   width: var(--hit-min);
   height: var(--hit-min);
   padding: 2px;
-  border: 1px solid var(--border-default);
+  border: var(--stroke-hairline) solid var(--border-default);
   border-radius: var(--radius-md);
   background: var(--surface-sunken);
   cursor: pointer;
@@ -154,7 +185,7 @@
 .preview-frame {
   width: 100%;
   aspect-ratio: 3 / 4;
-  border: 1px solid var(--border-default);
+  border: var(--stroke-hairline) solid var(--border-default);
   border-radius: var(--radius-md);
   background: var(--surface-0);
   overflow: hidden;

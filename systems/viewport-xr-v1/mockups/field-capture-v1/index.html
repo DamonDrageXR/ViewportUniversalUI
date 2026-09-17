@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Field capture — Viewport Universal UI</title>
+
+<!-- Four levels up: mockups live at systems/<system>/mockups/<mockup>/index.html.
+     tokens.css is not linked directly — use-tokens.js resolves which
+     system this mockup renders with, so ?system=<id> can retarget it. -->
+<script src="../../../../systems/manifest.js"></script>
+<script src="../../../../system/use-tokens.js"></script>
+<link rel="stylesheet" href="../../../../system/base.css">
+<link rel="stylesheet" href="../../../../system/components.css">
+<link rel="stylesheet" href="../../../../system/stage.css">
+<link rel="stylesheet" href="../../../../system/nav.css">
+<link rel="stylesheet" href="../../../../system/inspector.css">
+
+<style>
+  /* Phone: one hand, one thumb. Everything actionable sits in the bottom
+     third; the top is status the operator reads but never reaches for. */
+  .ph {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    padding: var(--space-3);
+    gap: var(--space-3);
+  }
+
+  .ph__status {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: var(--surface-glass);
+    backdrop-filter: blur(var(--blur-panel));
+    border: var(--stroke-hairline) solid var(--border-default);
+    border-radius: var(--radius-pill);
+    flex: 0 0 auto;
+  }
+
+  .ph__spacer { flex: 1 1 auto; }
+
+  /* Bottom sheet: the only part of the screen a thumb can reach comfortably
+     on a 6.1" phone held one-handed. */
+  .ph__sheet {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    background: var(--surface-glass-strong);
+    backdrop-filter: blur(var(--blur-panel));
+    border: var(--stroke-hairline) solid var(--border-default);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-3);
+  }
+
+  .ph__grip {
+    width: 36px;
+    height: var(--stroke-thick);
+    border-radius: var(--radius-pill);
+    background: var(--border-strong);
+    align-self: center;
+  }
+
+  .ph__chips { display: flex; gap: var(--space-2); overflow-x: auto; padding-bottom: var(--space-1); }
+
+  .ph__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--hit-min);
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-pill);
+    border: var(--stroke-hairline) solid var(--border-default);
+    background: var(--surface-raised);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
+
+  .ph__chip[aria-pressed="true"] {
+    background: var(--accent-quiet);
+    border-color: var(--accent);
+    color: var(--accent-fg);
+  }
+
+  .ph__actions { display: flex; align-items: center; gap: var(--space-3); }
+
+  .ph__capture {
+    width: var(--hit-xr);
+    height: var(--hit-xr);
+    border-radius: var(--radius-pill);
+    background: var(--accent-solid);
+    color: var(--text-on-accent);
+    display: grid;
+    place-items: center;
+    box-shadow: var(--shadow-2);
+    flex: 0 0 auto;
+  }
+</style>
+</head>
+
+<body>
+<main class="stage">
+
+  <header class="stage__header">
+    <h1 class="stage__title">Field capture — phone</h1>
+    <p class="stage__meta">Target: Phone · 393×852 · Status: draft · Updated 2026-09-17</p>
+  </header>
+
+  <!-- The control bar is injected here by stage.js -->
+
+  <section class="stage__notes">
+    <h2>Intent</h2>
+    <p>
+      What the app looks like on a phone — the device people actually have on them when they
+      are not carrying the iPad. Scoped down to: see where you are, toggle what is shown,
+      capture a note or photo.
+    </p>
+    <h2>Why it is built this way</h2>
+    <ul>
+      <li>Every control is in the bottom third, because the top of a 6.1" screen is out of thumb reach one-handed.</li>
+      <li>Layer toggles are horizontally scrolling chips rather than a tree — a tree needs two hands.</li>
+      <li>The capture button is <code>--hit-xr</code>, the largest target in the system, because it is pressed in gloves without looking.</li>
+    </ul>
+    <h2>Open questions</h2>
+    <ul>
+      <li>Is capture a photo, a marker, or a chooser? Shown here as one button with a long-press menu.</li>
+      <li>Should the sheet be draggable to full height for the layer tree, or is the chip row enough?</li>
+    </ul>
+  </section>
+
+  <div class="device device--phone" data-device="Phone · 393×852">
+    <div class="device__scene"></div>
+    <div class="device__ui">
+
+      <!-- ===== Mockup starts here ===== -->
+      <div class="ph">
+
+        <div class="ph__status">
+          <svg class="vp-icon vp-icon--sm" aria-hidden="true" style="color:var(--status-positive-fg)"><use href="#i-location"></use></svg>
+          <span class="vp-readout__value" style="font-size:var(--text-sm)">±0.08 m</span>
+          <span class="u-spacer"></span>
+          <span class="vp-badge vp-badge--positive">Fixed</span>
+          <button class="vp-tool" type="button" aria-label="Menu" style="width:var(--hit-min);height:var(--hit-min)">
+            <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-more"></use></svg>
+          </button>
+        </div>
+
+        <div class="ph__spacer"></div>
+
+        <div class="ph__sheet">
+          <span class="ph__grip" aria-hidden="true"></span>
+
+          <div class="ph__chips" role="group" aria-label="Visible layers">
+            <button class="ph__chip" type="button" aria-pressed="true">
+              <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-eye"></use></svg>Pit outline
+            </button>
+            <button class="ph__chip" type="button" aria-pressed="true">
+              <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-eye"></use></svg>Haul roads
+            </button>
+            <button class="ph__chip" type="button" aria-pressed="false">
+              <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-eye-off"></use></svg>Vegetation
+            </button>
+            <button class="ph__chip" type="button" aria-pressed="false">
+              <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-eye-off"></use></svg>Watercourses
+            </button>
+          </div>
+
+          <div class="ph__actions">
+            <button class="vp-tool" type="button" aria-label="Measure" style="width:var(--hit-comfortable);height:var(--hit-comfortable)">
+              <svg class="vp-icon" aria-hidden="true"><use href="#i-measure"></use></svg>
+            </button>
+            <button class="vp-tool" type="button" aria-label="Place marker" style="width:var(--hit-comfortable);height:var(--hit-comfortable)">
+              <svg class="vp-icon" aria-hidden="true"><use href="#i-marker"></use></svg>
+            </button>
+            <span class="u-spacer"></span>
+            <button class="ph__capture" type="button" aria-label="Capture">
+              <svg class="vp-icon vp-icon--lg" aria-hidden="true"><use href="#i-camera"></use></svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+      <!-- ===== Mockup ends here ===== -->
+
+    </div>
+  </div>
+
+</main>
+
+<script src="../../../../system/stage.js" defer></script>
+<script src="../../../../system/icons.js"></script>
+<script src="../../../../system/nav.js" defer></script>
+<script src="../../../../system/inspector.js" defer></script>
+</body>
+</html>

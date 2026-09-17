@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>System Preview — Viewport Universal UI</title>
+<title>Elements — Viewport Universal UI</title>
 
 <script src="../systems/manifest.js"></script>
 <script src="use-tokens.js"></script>
@@ -19,17 +19,36 @@
   .sect { display: flex; flex-direction: column; gap: var(--space-4); }
   .sect > h2 {
     font-size: var(--text-xs); letter-spacing: var(--tracking-wide); text-transform: uppercase;
-    color: var(--text-muted); padding-bottom: var(--space-2); border-bottom: 1px solid var(--border-subtle);
+    color: var(--text-muted); padding-bottom: var(--space-2);
+    border-bottom: var(--stroke-hairline) solid var(--border-subtle);
   }
+  .sect__note { font-size: var(--text-sm); color: var(--text-secondary); max-width: 68ch; }
   .specimen { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: flex-start; }
   .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-3); }
-  .swatch { border: 1px solid var(--border-subtle); border-radius: var(--radius-md); overflow: hidden; }
+  .swatch { border: var(--stroke-hairline) solid var(--border-subtle); border-radius: var(--radius-md); overflow: hidden; }
   .swatch__chip { height: 56px; }
   .swatch__name { padding: var(--space-2); font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-secondary); }
   .scale { display: flex; flex-direction: column; gap: var(--space-2); }
   .scale__row { display: flex; align-items: center; gap: var(--space-4); }
   .scale__bar { background: var(--accent); height: 12px; border-radius: var(--radius-sm); }
-  .scale__key { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-muted); width: 90px; flex: 0 0 auto; }
+  .scale__key { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-muted); width: 100px; flex: 0 0 auto; }
+  .scale__rule { flex: 1 1 auto; background: var(--text-primary); }
+
+  .icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: var(--space-2); }
+  .icons__cell {
+    display: flex; flex-direction: column; align-items: center; gap: var(--space-2);
+    padding: var(--space-3) var(--space-2);
+    border: var(--stroke-hairline) solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+  }
+  .icons__cell:hover { color: var(--text-primary); border-color: var(--border-strong); }
+  .icons__cell .vp-icon { width: 24px; height: 24px; }
+  .icons__name { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); text-align: center; word-break: break-all; }
+
+  /* ?view=elements — the studio embeds this page below the settings, where the
+     token swatches would just repeat the controls the user is already using. */
+  body.elements-only .tokens-section { display: none; }
 </style>
 </head>
 
@@ -37,46 +56,15 @@
 <div class="doc">
 
   <header class="doc__head">
-    <h1>Viewport Universal UI</h1>
-    <p class="stage__meta" style="color:var(--text-muted);font-size:var(--text-sm)">
-      Living system preview — every component in the library, rendered.
+    <h1>Elements</h1>
+    <p style="color:var(--text-muted);font-size:var(--text-sm)">
+      Every component in the library, live. Rendered with <strong id="which">—</strong>.
     </p>
     <span class="u-spacer"></span>
     <button class="vp-btn vp-btn--secondary" type="button" id="theme">Toggle theme</button>
   </header>
 
-  <section class="sect">
-    <h2>Surfaces &amp; depth</h2>
-    <div class="swatches" id="surfaces"></div>
-  </section>
-
-  <section class="sect">
-    <h2>Text &amp; accent</h2>
-    <div class="swatches" id="semantic"></div>
-  </section>
-
-  <section class="sect">
-    <h2>Space scale</h2>
-    <div class="scale" id="space"></div>
-  </section>
-
-  <section class="sect">
-    <h2>Type scale</h2>
-    <div class="scale" id="type"></div>
-  </section>
-
-  <section class="sect">
-    <h2>Hit targets</h2>
-    <p style="font-size:var(--text-sm);color:var(--text-secondary)">
-      Nothing interactive may be smaller than <code>--hit-min</code>. Use <code>--hit-xr</code>
-      for anything a hand or controller ray has to catch at distance.
-    </p>
-    <div class="specimen">
-      <button class="vp-btn vp-btn--secondary" type="button">--hit-min · 44px</button>
-      <button class="vp-btn vp-btn--secondary vp-btn--lg" type="button">--hit-comfortable · 56px</button>
-      <button class="vp-btn vp-btn--secondary vp-btn--xr" type="button">--hit-xr · 64px</button>
-    </div>
-  </section>
+  <!-- ===================== ELEMENTS ===================== -->
 
   <section class="sect">
     <h2>Buttons</h2>
@@ -87,24 +75,45 @@
       <button class="vp-btn vp-btn--danger" type="button">Delete layer</button>
       <button class="vp-btn vp-btn--primary" type="button" disabled>Disabled</button>
     </div>
+    <div class="specimen">
+      <button class="vp-btn vp-btn--secondary" type="button">
+        <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-download"></use></svg>Export
+      </button>
+      <button class="vp-btn vp-btn--primary vp-btn--lg" type="button">
+        <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-location"></use></svg>Re-anchor
+      </button>
+      <button class="vp-btn vp-btn--secondary vp-btn--xr" type="button">Ray / field size</button>
+    </div>
   </section>
 
   <section class="sect">
-    <h2>Toolbar &amp; tool buttons</h2>
+    <h2>Icons</h2>
+    <p class="sect__note">
+      Inherit <code>--stroke-icon</code>, so raising the system's line weight thickens them
+      along with every border. Sized in <code>em</code> to track the text beside them.
+    </p>
+    <div class="icons" id="icons"></div>
+  </section>
+
+  <section class="sect">
+    <h2>Toolbars &amp; tool buttons</h2>
     <div class="specimen">
       <div class="vp-toolbar">
-        <button class="vp-tool" type="button" aria-pressed="true" aria-label="Select">
-          <svg class="vp-tool__glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m4 3 7 17 2.5-6.5L20 11z"/></svg>
+        <button class="vp-tool" type="button" aria-pressed="true" aria-label="Pan">
+          <svg class="vp-icon" aria-hidden="true"><use href="#i-pan"></use></svg>
+        </button>
+        <button class="vp-tool" type="button" aria-pressed="false" aria-label="Orbit">
+          <svg class="vp-icon" aria-hidden="true"><use href="#i-orbit"></use></svg>
         </button>
         <button class="vp-tool" type="button" aria-pressed="false" aria-label="Measure">
-          <svg class="vp-tool__glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 14-14 4 4L7 21z"/><path d="M8 8l2 2M11 5l2 2"/></svg>
+          <svg class="vp-icon" aria-hidden="true"><use href="#i-measure"></use></svg>
         </button>
         <div class="vp-toolbar__divider"></div>
-        <button class="vp-tool" type="button" aria-pressed="false" aria-label="Settings">
-          <svg class="vp-tool__glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>
+        <button class="vp-tool" type="button" aria-pressed="false" aria-label="Section">
+          <svg class="vp-icon" aria-hidden="true"><use href="#i-section"></use></svg>
         </button>
         <button class="vp-tool" type="button" disabled aria-label="Unavailable">
-          <svg class="vp-tool__glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="m6 6 12 12"/></svg>
+          <svg class="vp-icon" aria-hidden="true"><use href="#i-camera"></use></svg>
         </button>
       </div>
 
@@ -117,7 +126,56 @@
   </section>
 
   <section class="sect">
-    <h2>Panel</h2>
+    <h2>Menus</h2>
+    <p class="sect__note">
+      Rows are a full <code>--hit-min</code>. A dense desktop menu is the classic thing that
+      works on a mouse and fails completely through a hand-tracked ray.
+    </p>
+    <div class="specimen">
+      <div class="vp-menu" role="menu">
+        <span class="vp-menu__label">Layer</span>
+        <button class="vp-menu__item" role="menuitem" type="button">
+          <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-eye"></use></svg>
+          <span class="vp-menu__text">Show only this</span>
+          <span class="vp-menu__shortcut">⇧H</span>
+        </button>
+        <button class="vp-menu__item" role="menuitemcheckbox" aria-checked="true" type="button">
+          <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-check"></use></svg>
+          <span class="vp-menu__text">Lock position</span>
+        </button>
+        <button class="vp-menu__item" role="menuitem" type="button">
+          <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-fit"></use></svg>
+          <span class="vp-menu__text">Zoom to extent</span>
+          <span class="vp-menu__shortcut">F</span>
+        </button>
+        <div class="vp-menu__sep"></div>
+        <button class="vp-menu__item" role="menuitem" type="button" disabled>
+          <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-share"></use></svg>
+          <span class="vp-menu__text">Share (needs signal)</span>
+        </button>
+        <button class="vp-menu__item vp-menu__item--danger" role="menuitem" type="button">
+          <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-trash"></use></svg>
+          <span class="vp-menu__text">Remove layer</span>
+        </button>
+      </div>
+
+      <div class="vp-menu" role="menu" style="min-width:auto">
+        <span class="vp-menu__label">View</span>
+        <button class="vp-menu__item" role="menuitem" type="button">
+          <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-grid"></use></svg>
+          <span class="vp-menu__text">Grid</span>
+        </button>
+        <button class="vp-menu__item" role="menuitem" type="button">
+          <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-sun"></use></svg>
+          <span class="vp-menu__text">Sun study</span>
+          <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-chevron-right"></use></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="sect">
+    <h2>Inputs &amp; controls</h2>
     <div class="specimen">
       <div class="vp-panel vp-panel--solid" style="width:var(--panel-width-md)">
         <div class="vp-panel__header">
@@ -153,17 +211,17 @@
         <div class="vp-panel__body vp-panel__body--tight">
           <div class="vp-tree" role="tree" aria-label="Layers">
             <div class="vp-tree__row" role="treeitem" aria-expanded="true" style="--depth:0">
-              <span class="vp-tree__twisty"><svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m6 3 5 5-5 5"/></svg></span>
+              <span class="vp-tree__twisty"><svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span>
               <span class="u-grow u-truncate">Site</span><span class="vp-tree__count">3</span>
             </div>
             <div class="vp-tree__row" role="treeitem" aria-selected="true" style="--depth:1">
-              <span class="vp-tree__swatch" style="background:#d9453f"></span><span class="u-grow u-truncate">Pit outline</span>
+              <span class="vp-tree__swatch" style="background:var(--status-critical)"></span><span class="u-grow u-truncate">Pit outline</span>
             </div>
             <div class="vp-tree__row" role="treeitem" style="--depth:1">
-              <span class="vp-tree__swatch" style="background:#1f9d63"></span><span class="u-grow u-truncate">Vegetation</span>
+              <span class="vp-tree__swatch" style="background:var(--status-positive)"></span><span class="u-grow u-truncate">Vegetation</span>
             </div>
             <div class="vp-tree__row" role="treeitem" style="--depth:1">
-              <span class="vp-tree__swatch" style="background:#1e88ff"></span><span class="u-grow u-truncate">Haul roads</span>
+              <span class="vp-tree__swatch" style="background:var(--accent)"></span><span class="u-grow u-truncate">Haul roads</span>
             </div>
           </div>
         </div>
@@ -199,22 +257,56 @@
   </section>
 
   <section class="sect">
-    <h2>Annotation (mockup-only)</h2>
-    <p style="font-size:var(--text-sm);color:var(--text-secondary)">
-      <code>.vp-note</code> with <code>data-note</code> pins a spec comment to a region during review.
+    <h2>Hit targets</h2>
+    <p class="sect__note">
+      Nothing interactive may be smaller than <code>--hit-min</code>. Use <code>--hit-xr</code>
+      for anything a hand or controller ray has to catch at distance. The audit enforces this.
     </p>
     <div class="specimen">
-      <button class="vp-btn vp-btn--primary vp-note" data-note="Confirm label with Cody" type="button" style="margin-top:var(--space-5)">Re-anchor</button>
+      <button class="vp-btn vp-btn--secondary" type="button">--hit-min</button>
+      <button class="vp-btn vp-btn--secondary vp-btn--lg" type="button">--hit-comfortable</button>
+      <button class="vp-btn vp-btn--secondary vp-btn--xr" type="button">--hit-xr</button>
     </div>
+  </section>
+
+  <!-- ===================== TOKENS ===================== -->
+
+  <section class="sect tokens-section">
+    <h2>Surfaces &amp; depth</h2>
+    <div class="swatches" id="surfaces"></div>
+  </section>
+
+  <section class="sect tokens-section">
+    <h2>Text &amp; accent</h2>
+    <div class="swatches" id="semantic"></div>
+  </section>
+
+  <section class="sect tokens-section">
+    <h2>Line weights</h2>
+    <div class="scale" id="strokes"></div>
+  </section>
+
+  <section class="sect tokens-section">
+    <h2>Space scale</h2>
+    <div class="scale" id="space"></div>
+  </section>
+
+  <section class="sect tokens-section">
+    <h2>Type scale</h2>
+    <div class="scale" id="type"></div>
   </section>
 
 </div>
 
+<script src="icons.js"></script>
+<script src="nav.js" defer></script>
+<script src="inspector.js" defer></script>
 <script>
   const SURFACES = ["--surface-0","--surface-1","--surface-2","--surface-3","--surface-raised","--surface-sunken","--surface-glass","--surface-glass-strong"];
-  const SEMANTIC = ["--text-primary","--text-secondary","--text-muted","--text-disabled","--accent","--accent-hover","--accent-quiet","--status-positive","--status-caution","--status-critical"];
+  const SEMANTIC = ["--text-primary","--text-secondary","--text-muted","--text-disabled","--accent","--accent-solid","--accent-fg","--status-positive-fg","--status-caution-fg","--status-critical-fg"];
   const SPACE = ["--space-1","--space-2","--space-3","--space-4","--space-5","--space-6","--space-7","--space-8"];
   const TYPE = ["--text-xs","--text-sm","--text-base","--text-lg","--text-xl","--text-2xl","--text-3xl"];
+  const STROKES = ["--stroke-hairline","--stroke-thin","--stroke-regular","--stroke-thick","--stroke-icon"];
 
   const chips = (id, names) => {
     document.getElementById(id).innerHTML = names.map((n) => `
@@ -228,23 +320,31 @@
   chips("semantic", SEMANTIC);
 
   document.getElementById("space").innerHTML = SPACE.map((n) => `
-    <div class="scale__row">
-      <span class="scale__key">${n}</span>
-      <span class="scale__bar" style="width:var(${n})"></span>
-    </div>`).join("");
+    <div class="scale__row"><span class="scale__key">${n}</span>
+      <span class="scale__bar" style="width:var(${n})"></span></div>`).join("");
+
+  document.getElementById("strokes").innerHTML = STROKES.map((n) => `
+    <div class="scale__row"><span class="scale__key">${n}</span>
+      <span class="scale__rule" style="height:var(${n})"></span></div>`).join("");
 
   document.getElementById("type").innerHTML = TYPE.map((n) => `
-    <div class="scale__row">
-      <span class="scale__key">${n}</span>
-      <span style="font-size:var(${n})">Viewport XR — 0123456789</span>
+    <div class="scale__row"><span class="scale__key">${n}</span>
+      <span style="font-size:var(${n})">Viewport XR — 0123456789</span></div>`).join("");
+
+  document.getElementById("icons").innerHTML = (window.VPIcons?.names ?? []).map((n) => `
+    <div class="icons__cell">
+      <svg class="vp-icon" aria-hidden="true"><use href="#${n}"></use></svg>
+      <span class="icons__name">${n.replace("i-", "")}</span>
     </div>`).join("");
+
+  const params = new URLSearchParams(location.search);
+  if (params.get("view") === "elements") document.body.classList.add("elements-only");
+  document.getElementById("which").textContent = window.VP_ACTIVE_SYSTEM || "no system";
 
   document.getElementById("theme").addEventListener("click", () => {
     const root = document.documentElement;
     root.setAttribute("data-theme", root.getAttribute("data-theme") === "light" ? "dark" : "light");
   });
 </script>
-<script src="nav.js" defer></script>
-<script src="inspector.js" defer></script>
 </body>
 </html>

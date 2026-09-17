@@ -214,16 +214,26 @@
       `v${state.system.version}${state.system.derivedFrom ? ` · from ${state.system.derivedFrom}` : ""}`;
   };
 
+  const renderMockups = () => {
+    const host = document.getElementById("mockup-tiles");
+    if (!host) return;
+    const mockups = state.system.mockups ?? [];
+    host.innerHTML = mockups.length
+      ? mockups.map((m) => window.VPTiles.mockupTile(m, {
+          base: "../", systemId, actions: true,
+        })).join("")
+      : `<p class="vp-empty">No mockups in this system yet. Phone, iPad portrait and iPad
+         landscape are the usual three.</p>`;
+  };
+
   const renderAll = () => { renderHeader(); renderGlobals(); renderGroups(); };
 
   /* ---- Live preview ------------------------------------------------------
      The preview is the real page in an iframe with the draft's generated CSS
      injected over it, so what you see is the same CSS that Save will write. */
 
-  const previewSrc = () => {
-    if (state.previewTarget === "system") return `/system/preview.html?system=${systemId}&chrome=0`;
-    return `/${state.previewTarget}?chrome=0`;
-  };
+  const previewSrc = () =>
+    `/system/preview.html?system=${systemId}&chrome=0&view=elements`;
 
   const inject = (css) => {
     const frame = document.getElementById("preview");
@@ -332,7 +342,33 @@
     }
   };
 
+  const reloadMockups = async () => {
+    const { systems } = await api("GET", "/state");
+    const fresh = systems.find((s) => s.id === systemId);
+    if (fresh) { state.system.mockups = fresh.mockups; renderMockups(); }
+  };
+
   const onClick = async (e) => {
+    const action = e.target.closest("[data-action]");
+    if (action) {
+      const { action: name, id, system } = action.dataset;
+      try {
+        if (name === "mockup-version") {
+          const created = await api("POST", `/systems/${system}/mockups/${id}/version`);
+          toast(`${created.id} created from ${created.derivedFrom}`, "vp-badge--positive");
+          await reloadMockups();
+          return;
+        }
+        if (name === "mockup-delete") {
+          if (!confirmDelete("mockup", `${id} in ${system}`)) return;
+          await api("DELETE", `/systems/${system}/mockups/${id}`);
+          toast(`Deleted ${id}`);
+          await reloadMockups();
+          return;
+        }
+      } catch (err) { fail(err); }
+    }
+
     const reset = e.target.closest("[data-reset]");
     if (reset) {
       const group = state.schema.groups.find((g) => g.tokens.some((t) => t.id === reset.dataset.reset));
@@ -352,6 +388,19 @@
       document.documentElement.setAttribute("data-theme", state.theme);
       renderGroups();
       refreshPreview();
+      return;
+    }
+
+    if (act.dataset.act === "mockup-new") {
+      const title = window.Studio.ask("Title for the new mockup", "New mockup");
+      if (!title) return;
+      const device = window.Studio.ask(
+        "Device: phone, ipad-portrait, ipad-landscape, desktop, desktop-wide, headset",
+        "ipad-landscape");
+      if (!device) return;
+      const created = await api("POST", `/systems/${systemId}/mockups`, { title, device });
+      toast(`Created ${created.id}`, "vp-badge--positive");
+      await reloadMockups();
       return;
     }
 
@@ -385,16 +434,10 @@
       overrides: structuredClone(system.overrides ?? {}),
     };
 
-    // Preview targets: the style guide, plus every mockup in this system.
-    const select = document.getElementById("target");
-    select.innerHTML =
-      `<option value="system">System preview</option>` +
-      system.mockups.map((m) => `<option value="${esc(m.href)}">${esc(m.title)} (v${esc(m.version)})</option>`).join("");
+    renderMockups();
 
-    select.addEventListener("change", () => {
-      state.previewTarget = select.value;
-      document.getElementById("preview").src = previewSrc();
-    });
+    document.getElementById("elements-link").href =
+      `/system/preview.html?system=${encodeURIComponent(systemId)}`;
 
     document.getElementById("name").addEventListener("input", (e) => {
       state.draft.name = e.target.value;

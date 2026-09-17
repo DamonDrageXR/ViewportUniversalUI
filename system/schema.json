@@ -1,5 +1,5 @@
 {
-  "note": "Describes what a design system contains and how each part may be edited. The studio builds its editors from this file, so a group's `control` is what constrains the UI — a colour group can only ever offer colour controls. Adding a token here adds it to the editor; nothing in the studio is hand-wired.",
+  "note": "Describes what a design system contains and how each part may be edited. The studio builds its editors from this file, so a group's `control` is what constrains the UI \u2014 a colour group can only ever offer colour controls. Adding a token here adds it to the editor; nothing in the studio is hand-wired.",
   "globals": [
     {
       "id": "accent",
@@ -41,6 +41,17 @@
       "note": "The medium radius. Small, large and extra-large scale from it."
     },
     {
+      "id": "lineWeight",
+      "label": "Line weight",
+      "control": "length",
+      "unit": "px",
+      "min": 1,
+      "max": 4,
+      "step": 0.5,
+      "default": 1,
+      "note": "Base stroke thickness. Borders, dividers and icon strokes all scale from it, so icons thicken with the rest of the system rather than drifting."
+    },
+    {
       "id": "spaceUnit",
       "label": "Spacing unit",
       "control": "length",
@@ -76,7 +87,7 @@
       "label": "Interface font",
       "control": "font",
       "default": "system",
-      "note": "System stacks only — a mockup must render identically offline, with no font to fetch or licence."
+      "note": "System stacks only \u2014 a mockup must render identically offline, with no font to fetch or licence."
     },
     {
       "id": "fontMono",
@@ -91,9 +102,18 @@
       "control": "select",
       "default": "comfortable",
       "options": [
-        { "value": "compact", "label": "Compact — desktop review" },
-        { "value": "comfortable", "label": "Comfortable — tablet" },
-        { "value": "field", "label": "Field — gloves, sun, ray targeting" }
+        {
+          "value": "compact",
+          "label": "Compact \u2014 desktop review"
+        },
+        {
+          "value": "comfortable",
+          "label": "Comfortable \u2014 tablet"
+        },
+        {
+          "value": "field",
+          "label": "Field \u2014 gloves, sun, ray targeting"
+        }
       ],
       "note": "Sets the hit-target floors. Field pushes every control to 64px."
     },
@@ -115,12 +135,30 @@
       "control": "color",
       "note": "Numbered by depth. 0 is the backing plane, 3 the nearest layer.",
       "tokens": [
-        { "id": "--surface-0", "label": "Backing" },
-        { "id": "--surface-1", "label": "Base" },
-        { "id": "--surface-2", "label": "Panel" },
-        { "id": "--surface-3", "label": "Raised panel" },
-        { "id": "--surface-raised", "label": "Hover / control" },
-        { "id": "--surface-sunken", "label": "Inset / track" }
+        {
+          "id": "--surface-0",
+          "label": "Backing"
+        },
+        {
+          "id": "--surface-1",
+          "label": "Base"
+        },
+        {
+          "id": "--surface-2",
+          "label": "Panel"
+        },
+        {
+          "id": "--surface-3",
+          "label": "Raised panel"
+        },
+        {
+          "id": "--surface-raised",
+          "label": "Hover / control"
+        },
+        {
+          "id": "--surface-sunken",
+          "label": "Inset / track"
+        }
       ]
     },
     {
@@ -128,11 +166,26 @@
       "label": "Text colour",
       "control": "color",
       "tokens": [
-        { "id": "--text-primary", "label": "Primary" },
-        { "id": "--text-secondary", "label": "Secondary" },
-        { "id": "--text-muted", "label": "Muted" },
-        { "id": "--text-disabled", "label": "Disabled" },
-        { "id": "--text-on-accent", "label": "On accent fill" }
+        {
+          "id": "--text-primary",
+          "label": "Primary"
+        },
+        {
+          "id": "--text-secondary",
+          "label": "Secondary"
+        },
+        {
+          "id": "--text-muted",
+          "label": "Muted"
+        },
+        {
+          "id": "--text-disabled",
+          "label": "Disabled"
+        },
+        {
+          "id": "--text-on-accent",
+          "label": "On accent fill"
+        }
       ]
     },
     {
@@ -141,10 +194,22 @@
       "control": "color",
       "note": "Three jobs, three values. Mark for outlines and selection, solid for fills behind white text, fg for accent text on a tinted chip.",
       "tokens": [
-        { "id": "--accent", "label": "Mark" },
-        { "id": "--accent-hover", "label": "Mark, hover" },
-        { "id": "--accent-solid", "label": "Solid fill" },
-        { "id": "--accent-fg", "label": "Accent text" }
+        {
+          "id": "--accent",
+          "label": "Mark"
+        },
+        {
+          "id": "--accent-hover",
+          "label": "Mark, hover"
+        },
+        {
+          "id": "--accent-solid",
+          "label": "Solid fill"
+        },
+        {
+          "id": "--accent-fg",
+          "label": "Accent text"
+        }
       ]
     },
     {
@@ -152,13 +217,34 @@
       "label": "Status colours",
       "control": "color",
       "tokens": [
-        { "id": "--status-positive", "label": "Positive" },
-        { "id": "--status-positive-fg", "label": "Positive text" },
-        { "id": "--status-caution", "label": "Caution" },
-        { "id": "--status-caution-fg", "label": "Caution text" },
-        { "id": "--status-critical", "label": "Critical" },
-        { "id": "--status-critical-fg", "label": "Critical text" },
-        { "id": "--status-critical-solid", "label": "Critical fill" }
+        {
+          "id": "--status-positive",
+          "label": "Positive"
+        },
+        {
+          "id": "--status-positive-fg",
+          "label": "Positive text"
+        },
+        {
+          "id": "--status-caution",
+          "label": "Caution"
+        },
+        {
+          "id": "--status-caution-fg",
+          "label": "Caution text"
+        },
+        {
+          "id": "--status-critical",
+          "label": "Critical"
+        },
+        {
+          "id": "--status-critical-fg",
+          "label": "Critical text"
+        },
+        {
+          "id": "--status-critical-solid",
+          "label": "Critical fill"
+        }
       ]
     },
     {
@@ -170,10 +256,54 @@
       "max": 40,
       "step": 1,
       "tokens": [
-        { "id": "--radius-sm", "label": "Small" },
-        { "id": "--radius-md", "label": "Medium" },
-        { "id": "--radius-lg", "label": "Large" },
-        { "id": "--radius-xl", "label": "Extra large" }
+        {
+          "id": "--radius-sm",
+          "label": "Small"
+        },
+        {
+          "id": "--radius-md",
+          "label": "Medium"
+        },
+        {
+          "id": "--radius-lg",
+          "label": "Large"
+        },
+        {
+          "id": "--radius-xl",
+          "label": "Extra large"
+        }
+      ]
+    },
+    {
+      "id": "stroke",
+      "label": "Line weights",
+      "control": "length",
+      "unit": "px",
+      "min": 0,
+      "max": 12,
+      "step": 0.5,
+      "note": "Hairline is for dividers and panel edges; icon is the SVG stroke-width every icon inherits.",
+      "tokens": [
+        {
+          "id": "--stroke-hairline",
+          "label": "Hairline"
+        },
+        {
+          "id": "--stroke-thin",
+          "label": "Thin"
+        },
+        {
+          "id": "--stroke-regular",
+          "label": "Regular"
+        },
+        {
+          "id": "--stroke-thick",
+          "label": "Thick"
+        },
+        {
+          "id": "--stroke-icon",
+          "label": "Icon stroke"
+        }
       ]
     },
     {
@@ -185,14 +315,38 @@
       "max": 96,
       "step": 1,
       "tokens": [
-        { "id": "--space-1", "label": "1" },
-        { "id": "--space-2", "label": "2" },
-        { "id": "--space-3", "label": "3" },
-        { "id": "--space-4", "label": "4" },
-        { "id": "--space-5", "label": "5" },
-        { "id": "--space-6", "label": "6" },
-        { "id": "--space-7", "label": "7" },
-        { "id": "--space-8", "label": "8" }
+        {
+          "id": "--space-1",
+          "label": "1"
+        },
+        {
+          "id": "--space-2",
+          "label": "2"
+        },
+        {
+          "id": "--space-3",
+          "label": "3"
+        },
+        {
+          "id": "--space-4",
+          "label": "4"
+        },
+        {
+          "id": "--space-5",
+          "label": "5"
+        },
+        {
+          "id": "--space-6",
+          "label": "6"
+        },
+        {
+          "id": "--space-7",
+          "label": "7"
+        },
+        {
+          "id": "--space-8",
+          "label": "8"
+        }
       ]
     },
     {
@@ -204,13 +358,34 @@
       "max": 72,
       "step": 1,
       "tokens": [
-        { "id": "--text-xs", "label": "Extra small" },
-        { "id": "--text-sm", "label": "Small" },
-        { "id": "--text-base", "label": "Base" },
-        { "id": "--text-lg", "label": "Large" },
-        { "id": "--text-xl", "label": "Extra large" },
-        { "id": "--text-2xl", "label": "2XL" },
-        { "id": "--text-3xl", "label": "3XL" }
+        {
+          "id": "--text-xs",
+          "label": "Extra small"
+        },
+        {
+          "id": "--text-sm",
+          "label": "Small"
+        },
+        {
+          "id": "--text-base",
+          "label": "Base"
+        },
+        {
+          "id": "--text-lg",
+          "label": "Large"
+        },
+        {
+          "id": "--text-xl",
+          "label": "Extra large"
+        },
+        {
+          "id": "--text-2xl",
+          "label": "2XL"
+        },
+        {
+          "id": "--text-3xl",
+          "label": "3XL"
+        }
       ]
     },
     {
@@ -218,8 +393,15 @@
       "label": "Fonts",
       "control": "font",
       "tokens": [
-        { "id": "--font-sans", "label": "Interface" },
-        { "id": "--font-mono", "label": "Monospace", "variant": "mono" }
+        {
+          "id": "--font-sans",
+          "label": "Interface"
+        },
+        {
+          "id": "--font-mono",
+          "label": "Monospace",
+          "variant": "mono"
+        }
       ]
     },
     {
@@ -232,9 +414,18 @@
       "step": 1,
       "note": "The audit enforces --hit-min. Lowering it below 44 will fail every page.",
       "tokens": [
-        { "id": "--hit-min", "label": "Minimum" },
-        { "id": "--hit-comfortable", "label": "Comfortable" },
-        { "id": "--hit-xr", "label": "Ray / field" }
+        {
+          "id": "--hit-min",
+          "label": "Minimum"
+        },
+        {
+          "id": "--hit-comfortable",
+          "label": "Comfortable"
+        },
+        {
+          "id": "--hit-xr",
+          "label": "Ray / field"
+        }
       ]
     },
     {
@@ -246,10 +437,22 @@
       "max": 800,
       "step": 10,
       "tokens": [
-        { "id": "--duration-instant", "label": "Instant" },
-        { "id": "--duration-fast", "label": "Fast" },
-        { "id": "--duration-normal", "label": "Normal" },
-        { "id": "--duration-slow", "label": "Slow" }
+        {
+          "id": "--duration-instant",
+          "label": "Instant"
+        },
+        {
+          "id": "--duration-fast",
+          "label": "Fast"
+        },
+        {
+          "id": "--duration-normal",
+          "label": "Normal"
+        },
+        {
+          "id": "--duration-slow",
+          "label": "Slow"
+        }
       ]
     },
     {
@@ -262,19 +465,58 @@
       "step": 1,
       "note": "Real z-offsets for the engine build, declared next to the shadows that stand in for them on a flat screen.",
       "tokens": [
-        { "id": "--depth-raised", "label": "Raised" },
-        { "id": "--depth-float", "label": "Floating" },
-        { "id": "--depth-modal", "label": "Modal" }
+        {
+          "id": "--depth-raised",
+          "label": "Raised"
+        },
+        {
+          "id": "--depth-float",
+          "label": "Floating"
+        },
+        {
+          "id": "--depth-modal",
+          "label": "Modal"
+        }
       ]
     }
   ],
   "fonts": [
-    { "value": "system", "label": "System UI", "stack": "\"Inter\", \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, -apple-system, sans-serif" },
-    { "value": "grotesk", "label": "Neo-grotesque", "stack": "\"Helvetica Neue\", Helvetica, \"Segoe UI\", Arial, sans-serif" },
-    { "value": "humanist", "label": "Humanist", "stack": "\"Optima\", \"Segoe UI\", \"Gill Sans\", Candara, sans-serif" },
-    { "value": "geometric", "label": "Geometric", "stack": "\"Century Gothic\", \"Futura\", \"Avenir Next\", Avenir, sans-serif" },
-    { "value": "serif", "label": "Serif", "stack": "\"Iowan Old Style\", \"Palatino Linotype\", Georgia, serif" },
-    { "value": "system-mono", "label": "System mono", "stack": "\"JetBrains Mono\", \"Cascadia Code\", ui-monospace, \"SF Mono\", Consolas, monospace", "variant": "mono" },
-    { "value": "mono-classic", "label": "Classic mono", "stack": "\"Courier New\", Courier, ui-monospace, monospace", "variant": "mono" }
+    {
+      "value": "system",
+      "label": "System UI",
+      "stack": "\"Inter\", \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, -apple-system, sans-serif"
+    },
+    {
+      "value": "grotesk",
+      "label": "Neo-grotesque",
+      "stack": "\"Helvetica Neue\", Helvetica, \"Segoe UI\", Arial, sans-serif"
+    },
+    {
+      "value": "humanist",
+      "label": "Humanist",
+      "stack": "\"Optima\", \"Segoe UI\", \"Gill Sans\", Candara, sans-serif"
+    },
+    {
+      "value": "geometric",
+      "label": "Geometric",
+      "stack": "\"Century Gothic\", \"Futura\", \"Avenir Next\", Avenir, sans-serif"
+    },
+    {
+      "value": "serif",
+      "label": "Serif",
+      "stack": "\"Iowan Old Style\", \"Palatino Linotype\", Georgia, serif"
+    },
+    {
+      "value": "system-mono",
+      "label": "System mono",
+      "stack": "\"JetBrains Mono\", \"Cascadia Code\", ui-monospace, \"SF Mono\", Consolas, monospace",
+      "variant": "mono"
+    },
+    {
+      "value": "mono-classic",
+      "label": "Classic mono",
+      "stack": "\"Courier New\", Courier, ui-monospace, monospace",
+      "variant": "mono"
+    }
   ]
 }

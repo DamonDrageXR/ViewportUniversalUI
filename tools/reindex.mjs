@@ -55,6 +55,7 @@ export const reindex = async ({ regenerateTokens = true } = {}) => {
     updated: s.updated ?? "",
     isLatest: latest.some((l) => l.id === s.id),
     accent: tokens["--accent"],
+    lineWeight: s.globals?.lineWeight ?? 1,
     surfaces: [tokens["--surface-0"], tokens["--surface-1"], tokens["--surface-2"], tokens["--surface-raised"]],
     mockups: s.mockups,
     };

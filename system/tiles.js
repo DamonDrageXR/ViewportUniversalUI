@@ -51,10 +51,13 @@
    * than a stored screenshot — a screenshot would need regenerating on every
    * token change and would quietly go stale between times.
    */
-  const mockupTile = (m, { base = "", systemId = "", actions = false } = {}) => {
-    const href = `${base}${m.href}`;
+  const mockupTile = (m, { base = "", systemId = "", actions = false, systemName = "", renderAs = "" } = {}) => {
+    // renderAs lets the mockup view show every mockup under one chosen system,
+    // rather than each under the one it happens to live in.
+    const retarget = renderAs && renderAs !== systemId ? `?system=${encodeURIComponent(renderAs)}` : "";
+    const href = `${base}${m.href}${retarget}`;
     // The tile links to the full page but embeds the bare one.
-    const thumb = `${href}?chrome=0`;
+    const thumb = `${base}${m.href}?chrome=0${retarget ? `&system=${encodeURIComponent(renderAs)}` : ""}`;
     const w = DEVICE_WIDTH[m.device] ?? 1366;
     const h = DEVICE_HEIGHT[m.device] ?? 1024;
 
@@ -68,7 +71,9 @@
           <span class="vp-mockup__title">${esc(m.title)}</span>
           <span class="vp-mockup__tags">
             <span class="vp-badge">v${esc(m.version)}</span>
+            <span class="vp-badge">${esc(m.device)}</span>
             <span class="vp-badge ${STATUS_TONE[m.status] ?? ""}">${esc(m.status)}</span>
+            ${systemName ? `<span class="vp-badge vp-badge--accent">${esc(systemName)}</span>` : ""}
           </span>
         </div>
         ${actions ? `<div class="vp-mockup__actions">
@@ -103,23 +108,16 @@
 
         <div class="vp-tile__facts">
           ${fact("Accent", s.accent ?? "—")}
+          ${fact("Mockups", String(mockups.length))}
+          ${fact("Line weight", s.lineWeight ? `${s.lineWeight}px` : "—")}
           ${fact("Updated", s.updated || "—")}
         </div>
 
-        <div class="vp-tile__body">
-          <span class="vp-tile__label">${mockups.length} mockup${mockups.length === 1 ? "" : "s"}</span>
-          ${mockups.length
-            ? `<div class="vp-mockups">${mockups.map((m) =>
-                mockupTile(m, { base, systemId: s.id, actions })).join("")}</div>`
-            : `<p class="vp-empty">None yet${actions ? " — add one below" : ""}.</p>`}
-        </div>
-
         <div class="vp-tile__actions">
-          <a class="vp-btn vp-btn--secondary" href="${base}system/preview.html?system=${esc(s.id)}">Tokens</a>
+          <a class="vp-btn vp-btn--secondary" href="${base}system/preview.html?system=${esc(s.id)}">Elements</a>
           ${actions ? `
-            <a class="vp-btn vp-btn--primary" href="system.html?id=${esc(s.id)}">Edit</a>
+            <a class="vp-btn vp-btn--primary" href="system.html?id=${esc(s.id)}">Open</a>
             ${btn("New version", "system-version", s.id)}
-            ${btn("New mockup", "mockup-new", s.id)}
             ${btn("Delete", "system-delete", s.id)}
           ` : ""}
         </div>

@@ -13,11 +13,15 @@
 
 <style>
   body { padding: var(--space-7) var(--space-5); }
-  .wrap { max-width: var(--content-max); margin-inline: auto; display: flex; flex-direction: column; gap: var(--space-6); }
+  .wrap { max-width: var(--content-max); margin-inline: auto; display: flex; flex-direction: column; gap: var(--space-7); }
   .hero { display: flex; flex-direction: column; gap: var(--space-2); }
-  .hero p { color: var(--text-secondary); max-width: 64ch; }
+  .hero p { color: var(--text-secondary); max-width: 66ch; }
+  .band { display: flex; flex-direction: column; gap: var(--space-4); }
+  .band__head { display: flex; flex-direction: column; gap: var(--space-2); }
+  .band__head h2 { font-size: var(--text-xl); }
+  .band__head p { color: var(--text-secondary); font-size: var(--text-sm); max-width: 72ch; }
   .empty {
-    padding: var(--space-6); border: 1px dashed var(--border-default);
+    padding: var(--space-6); border: var(--stroke-hairline) dashed var(--border-default);
     border-radius: var(--radius-lg); color: var(--text-muted); text-align: center;
   }
 </style>
@@ -29,53 +33,111 @@
   <header class="hero">
     <h1>Viewport Universal UI</h1>
     <p>
-      Every design system and the mockups built with it. This page is read-only —
-      to create, edit or delete systems and mockups, run <code>npm run studio</code>
-      and open the studio.
+      Two views. <strong>Systems</strong> are the design language — palette, type, line weights,
+      and how every button, slider, icon and menu behaves. <strong>Mockups</strong> are what that
+      language looks like on a real device.
+    </p>
+    <p>
+      This page is read-only. To create, configure or delete anything, run
+      <code>npm run studio</code>.
     </p>
     <div class="u-row" style="margin-top:var(--space-2); flex-wrap: wrap">
       <a class="vp-btn vp-btn--primary" href="studio/index.html">Open studio</a>
-      <a class="vp-btn vp-btn--secondary" href="system/preview.html">System preview</a>
+      <a class="vp-btn vp-btn--secondary" href="system/preview.html">Elements</a>
       <a class="vp-btn vp-btn--secondary" href="docs/how-to-use.html">How to use</a>
     </div>
   </header>
 
-  <section class="u-stack" id="systems"></section>
+  <section class="band">
+    <header class="band__head">
+      <h2>Systems</h2>
+      <p>Each version is kept. Open one in the studio to configure its settings and see the elements it produces.</p>
+    </header>
+    <div id="systems"></div>
+  </section>
+
+  <section class="band">
+    <header class="band__head">
+      <h2>Mockups</h2>
+      <p>Grouped by device. Each is built with a system; in the studio you can re-render them all with any other.</p>
+    </header>
+    <div id="mockups"></div>
+  </section>
 
 </div>
 
 <script src="system/tiles.js"></script>
 <script>
-  const host = document.getElementById("systems");
+(() => {
   const systems = Array.isArray(window.VP_SYSTEMS) ? window.VP_SYSTEMS : [];
+  const esc = VPTiles.esc;
 
-  if (systems.length === 0) {
-    host.innerHTML =
-      '<p class="empty">No systems yet. Run <code>npm run studio</code> and create one, ' +
-      'or <code>node tools/reindex.mjs</code> if you expected to see some.</p>';
-  } else {
-    // Group versions under their family so iterations read as a run rather
-    // than as unrelated systems.
-    const families = new Map();
-    for (const s of systems) {
-      if (!families.has(s.family)) families.set(s.family, []);
-      families.get(s.family).push(s);
-    }
+  const DEVICE_LABEL = {
+    phone: "Phone",
+    "ipad-portrait": "iPad — portrait",
+    "ipad-landscape": "iPad — landscape",
+    desktop: "Desktop",
+    "desktop-wide": "Desktop — wide",
+    headset: "Headset",
+  };
 
-    host.innerHTML = [...families.entries()].map(([family, versions]) => {
-      const sorted = [...versions].sort((a, b) => b.version - a.version);
-      return `
-        <section class="vp-tiles__group">
-          <header class="vp-tiles__grouphead">
-            <h2>${VPTiles.esc(sorted[0].name)}</h2>
-            <span class="vp-badge">${sorted.length} version${sorted.length === 1 ? "" : "s"}</span>
-          </header>
-          <div class="vp-tiles">
-            ${sorted.map((s) => VPTiles.systemTile(s, { base: "" })).join("")}
-          </div>
-        </section>`;
-    }).join("");
+  const systemsHost = document.getElementById("systems");
+  const mockupsHost = document.getElementById("mockups");
+
+  if (!systems.length) {
+    systemsHost.innerHTML =
+      '<p class="empty">No systems yet. Run <code>npm run studio</code> to create one.</p>';
+    mockupsHost.innerHTML = '<p class="empty">Nothing to show yet.</p>';
+    return;
   }
+
+  // --- Systems, grouped by family so versions read as a run ---
+  const families = new Map();
+  for (const s of systems) {
+    if (!families.has(s.family)) families.set(s.family, []);
+    families.get(s.family).push(s);
+  }
+
+  systemsHost.innerHTML = [...families.entries()].map(([, versions]) => {
+    const sorted = [...versions].sort((a, b) => b.version - a.version);
+    return `
+      <section class="vp-tiles__group">
+        <header class="vp-tiles__grouphead">
+          <h3>${esc(sorted[0].name)}</h3>
+          <span class="vp-badge">${sorted.length} version${sorted.length === 1 ? "" : "s"}</span>
+        </header>
+        <div class="vp-tiles">${sorted.map((s) => VPTiles.systemTile(s, { base: "" })).join("")}</div>
+      </section>`;
+  }).join("");
+
+  // --- Mockups, grouped by device ---
+  const all = systems.flatMap((s) =>
+    (s.mockups ?? []).map((m) => ({ ...m, systemId: s.id, systemName: `${s.name} v${s.version}` })));
+
+  if (!all.length) {
+    mockupsHost.innerHTML = '<p class="empty">No mockups yet.</p>';
+    return;
+  }
+
+  const byDevice = new Map();
+  for (const m of all) {
+    if (!byDevice.has(m.device)) byDevice.set(m.device, []);
+    byDevice.get(m.device).push(m);
+  }
+
+  mockupsHost.innerHTML = [...byDevice.entries()].map(([device, list]) => `
+    <section class="vp-tiles__group">
+      <header class="vp-tiles__grouphead">
+        <h3>${esc(DEVICE_LABEL[device] ?? device)}</h3>
+        <span class="vp-badge">${list.length}</span>
+      </header>
+      <div class="vp-mockups" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr))">
+        ${list.map((m) => VPTiles.mockupTile(m, {
+          base: "", systemId: m.systemId, systemName: m.systemName,
+        })).join("")}
+      </div>
+    </section>`).join("");
+})();
 </script>
 </body>
 </html>
