@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en-AU" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Place the model — Viewport Universal UI</title>
+
+<script src="../../../../systems/manifest.js"></script>
+<script src="../../../../system/use-tokens.js"></script>
+<link rel="stylesheet" href="../../../../system/base.css">
+<link rel="stylesheet" href="../../../../system/components.css">
+<link rel="stylesheet" href="../../../../system/stage.css">
+<link rel="stylesheet" href="../../../../system/nav.css">
+<link rel="stylesheet" href="../../../../system/inspector.css">
+
+<style>
+  /* State 2: the camera feed IS running, so the panel has to prove it can be
+     read over it. Left to its own devices a paper-white panel over a bright
+     site is the easiest thing in the product to get wrong. */
+  .cf { display: flex; width: 100%; height: 100%; }
+
+  .cf__view { flex: 1 1 auto; min-width: 0; position: relative; }
+
+  /* The one panel, edge-justified, 35% and not a pixel more. Edge-justified
+     because a floating panel has two gaps to misjudge and this has one. */
+  .cf__panel {
+    flex: 0 0 35%;
+    max-width: 35%;
+    border-left: var(--stroke-thin) solid var(--border-strong);
+    background: var(--surface-1);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .cf__head {
+    padding: var(--space-4);
+    border-bottom: var(--stroke-hairline) dashed var(--border-subtle);
+  }
+  .cf__head h3 { margin: 0; font-size: var(--text-xl); font-weight: var(--weight-regular); }
+  .cf__head p { margin: var(--space-1) 0 0; color: var(--text-secondary); font-size: var(--text-sm); }
+
+  .cf__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .cf__group { display: flex; flex-direction: column; gap: var(--space-3); }
+
+  .cf__grouplabel {
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* Actions are pinned, never scrolled. You must be able to commit or back out
+     without hunting, because the experience is held while you are in here. */
+  .cf__foot {
+    padding: var(--space-4);
+    border-top: var(--stroke-hairline) solid var(--border-default);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  /* Annotation of the rule itself, drawn on the view. Review furniture — it is
+     not part of the interface. */
+  .cf__zone {
+    position: absolute;
+    inset: var(--space-4);
+    border: var(--stroke-hairline) dashed var(--accent);
+    border-radius: var(--radius-md);
+    display: grid;
+    place-items: end start;
+    padding: var(--space-3);
+    pointer-events: none;
+  }
+
+  .cf__zonetag {
+    background: var(--surface-1);
+    border: var(--stroke-hairline) solid var(--accent);
+    border-radius: var(--radius-sm);
+    padding: 0 var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-primary);
+  }
+
+  /* A world-anchored label. Not UI: it does not follow the user, it need not
+     be reachable, and it fades with distance. */
+  .cf__tag {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    background: var(--surface-1);
+    border: var(--stroke-hairline) solid var(--border-default);
+    border-radius: var(--radius-pill);
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-sm);
+  }
+  .cf__tag--near { top: 38%; left: 22%; }
+  .cf__tag--far  { top: 24%; left: 52%; opacity: 0.55; font-size: var(--text-xs); }
+</style>
+</head>
+
+<body>
+<main class="stage">
+
+  <header class="stage__header">
+    <h1 class="stage__title">Place the model — iPad landscape</h1>
+    <p class="stage__meta">Target: iPad Pro · 1366×1024 · State 2 of 3 · Status: review · Updated 2026-09-17</p>
+  </header>
+
+  <section class="stage__notes">
+    <h2>Intent</h2>
+    <p>
+      The middle state, and the one that gets broken most often. The experience is live but
+      held: you are lining the model up with the world, which means you must be able to see the
+      world the whole time you are adjusting it. So the view never closes, and the UI gets one
+      panel — not a stack of floating cards over the thing you are trying to judge.
+    </p>
+    <h2>Why it is built this way</h2>
+    <ul>
+      <li>Exactly one panel, edge-justified, capped at 35% of the width. One panel has one gap to misjudge; a floating card has four.</li>
+      <li>The panel is opaque with a heavy edge. A translucent panel over a bright site is the easiest contrast failure in the product.</li>
+      <li>Commit and cancel are pinned to the bottom and never scroll, because the experience is held for as long as you are in here.</li>
+      <li>The spatial tags are world-anchored, not interface: they do not follow the viewer, they need not be reachable, and the far one fades with distance.</li>
+    </ul>
+    <h2>Open questions</h2>
+    <ul>
+      <li>Should the panel be dismissible to a handle while still held, or does hiding the controls invite leaving the model half-placed?</li>
+      <li>Nudge in metres or in the model's own units? Shown in metres.</li>
+    </ul>
+  </section>
+
+  <div class="device device--ipad-landscape" data-device="iPad Pro · landscape · 1366×1024">
+    <div class="device__scene"></div>
+    <div class="device__ui">
+
+      <!-- ===== Mockup starts here ===== -->
+      <div class="cf">
+
+        <div class="cf__view">
+          <span class="cf__tag cf__tag--near">
+            <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-marker"></use></svg>Pit crest — RL 412
+          </span>
+          <span class="cf__tag cf__tag--far">Haul road 3</span>
+
+          <div class="cf__zone">
+            <span class="cf__zonetag">View stays open · 65%</span>
+          </div>
+        </div>
+
+        <aside class="cf__panel">
+          <div class="cf__head">
+            <h3>Place the model</h3>
+            <p>Mindy South · held while you adjust</p>
+          </div>
+
+          <div class="cf__body">
+
+            <div class="cf__group">
+              <span class="cf__grouplabel">Anchor</span>
+              <div class="vp-segmented" role="group" aria-label="Anchor method">
+                <button class="vp-segmented__option" type="button" aria-pressed="true">Survey mark</button>
+                <button class="vp-segmented__option" type="button" aria-pressed="false">Plane</button>
+                <button class="vp-segmented__option" type="button" aria-pressed="false">By hand</button>
+              </div>
+              <div class="vp-readout">
+                <span class="vp-readout__label">Fix quality</span>
+                <span class="vp-readout__value">±0.08 m</span>
+              </div>
+            </div>
+
+            <div class="cf__group">
+              <span class="cf__grouplabel">Nudge</span>
+              <div class="vp-field">
+                <label class="vp-field__label" for="cf-east">East</label>
+                <input class="vp-input" id="cf-east" type="text" value="+0.42 m" inputmode="decimal">
+              </div>
+              <div class="vp-field">
+                <label class="vp-field__label" for="cf-north">North</label>
+                <input class="vp-input" id="cf-north" type="text" value="-0.11 m" inputmode="decimal">
+              </div>
+              <div class="vp-field">
+                <label class="vp-field__label" for="cf-rot">Rotation</label>
+                <input class="vp-input" id="cf-rot" type="text" value="3.2°" inputmode="decimal">
+              </div>
+            </div>
+
+            <div class="cf__group">
+              <span class="cf__grouplabel">Showing</span>
+              <label class="vp-toggle">
+                <input type="checkbox" checked>
+                <span class="vp-toggle__track"><span class="vp-toggle__thumb"></span></span>
+                <span>Pit outline</span>
+              </label>
+              <label class="vp-toggle">
+                <input type="checkbox" checked>
+                <span class="vp-toggle__track"><span class="vp-toggle__thumb"></span></span>
+                <span>Haul roads</span>
+              </label>
+              <label class="vp-toggle">
+                <input type="checkbox">
+                <span class="vp-toggle__track"><span class="vp-toggle__thumb"></span></span>
+                <span>Vegetation</span>
+              </label>
+            </div>
+
+          </div>
+
+          <div class="cf__foot">
+            <button class="vp-btn vp-btn--primary vp-btn--lg vp-btn--block" type="button">Start the walk</button>
+            <button class="vp-btn vp-btn--ghost vp-btn--block" type="button">Cancel and leave the room</button>
+          </div>
+        </aside>
+
+      </div>
+      <!-- ===== Mockup ends here ===== -->
+
+    </div>
+  </div>
+
+</main>
+
+<script src="../../../../system/stage.js" defer></script>
+<script src="../../../../system/icons.js"></script>
+<script src="../../../../system/nav.js" defer></script>
+<script src="../../../../system/inspector.js" defer></script>
+</body>
+</html>

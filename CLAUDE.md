@@ -12,8 +12,9 @@ system/       the engine, shared by every system:
               schema.json — what a system contains and how it may be edited
               preview.html — the elements page (?system=<id>&view=elements)
 systems/      one folder per system VERSION:
-              <family>-v<n>/system.json   globals + explicit overrides
+              <family>-v<n>/system.json   globals + rules + explicit overrides
               <family>-v<n>/tokens.css    GENERATED — never hand-edit
+              <family>-v<n>/components.css  OPTIONAL, rarely needed
               <family>-v<n>/mockups/<family>-v<n>/
                 mockup.json  title, status, summary, screens[]
                 phone.html · ipad-portrait.html · ipad-landscape.html
@@ -34,14 +35,49 @@ index.html    read-only overview; works from file://
 studio; never edit the CSS, it is overwritten on the next reindex.
 
 A system has:
-- **globals** — ~11 values (accent, neutral hue, radius, spacing unit, base
-  text size, type scale, fonts, density, panel opacity).
+- **globals** — ~16 values (accent, the three status hues, neutral hue and
+  saturation, radius, line weight, icon stroke ratio, spacing unit, base text
+  size, type scale, fonts, density, panel opacity).
+- **rules** — structural decisions no value can carry; see below.
 - **overrides** — explicit per-token pins, in three scopes: `shared`, `dark`,
   `light`. An override wins over the derived value and is shown as "custom"
   in the studio.
 
 Everything else is derived by `tools/lib/system.mjs`. Change one global and the
 whole system moves with it.
+
+### Rules are the other half of a system
+
+Two systems can share every token and still not be the same language. "No
+shadows", "buttons are never filled", "disabled is a hatch", "colour means a
+status" are decisions about whether a treatment is **allowed**, not about what
+value it takes — so they live in `rules`, not in tokens.
+
+A rule reaches a page two ways. The ones that are purely a value fold into the
+token set (`shadows: none` sets every `--shadow-*` to `none`). The rest land as
+`data-rule-*` attributes on `<html>` via `system/use-tokens.js`, and
+`system/components.css` styles against them in the **RULES LAYER** at the
+bottom of that file.
+
+Add a rule by adding it to `rules` in `system/schema.json` and styling it in
+that layer. It then appears in the studio's Rules panel with no studio code
+change, and **every** system can opt into it — which is the point. A rule
+written for one system that cannot be reused by another belongs in that
+system's own `components.css` instead.
+
+Keyed on an attribute rather than on load order, because a per-system
+`components.css` is injected in `<head>` *before* the shared sheets. If you do
+add one, its selectors must out-specify the shared rules (prefix them with
+`[data-system="<id>"]`) or they are dead code that looks live.
+
+### Single-theme systems
+
+`rules.themes` is `both`, `light-only` or `dark-only`. A single-theme system
+emits one palette into `:root`, `use-tokens.js` pins `data-theme` to it, and
+the studio disables the theme switch. Anything that reads a system's palette
+must read `resolve(s, schema).themes[0]`, never `.dark` — hardcoding the dark
+theme is how a light-only system ends up advertising four dark swatches it does
+not contain.
 
 ### Derived contrast is a guarantee, not a suggestion
 
@@ -98,8 +134,15 @@ tokens injected, so it is the real page, interactive, not a picture of one.
 ```
 
 Icons carry no stroke-width of their own so they inherit `--stroke-icon`, which
-means raising a system's line weight thickens them along with every border. Add
-a new icon to the `PATHS` map — 24px grid, stroke only, no fills.
+means raising a system's line weight thickens them along with every border. The
+`iconStroke` global is the multiplier between the two: `1.0` makes an icon
+exactly as heavy as a border (what a paper language wants), higher keeps icons
+from disappearing against hairline borders. Add a new icon to the `PATHS` map —
+24px grid, stroke only, no fills.
+
+`--stroke-icon` is in the SVG's user units on a 24px grid, so a 16px icon draws
+a 2px stroke at about 1.3px on screen. That is correct — a drawing scales — and
+it is why the ratio is a control rather than a constant.
 
 ## Adding an editable token
 
@@ -123,6 +166,19 @@ node tools/new-mockup.mjs "Title" --system <id> --device <device>
 Devices: `ipad-landscape`, `ipad-portrait`, `desktop`, `desktop-wide`,
 `headset`, `phone`.
 
+## The two systems
+
+`paper-v1` is the **Paper System — Viewport XR**, expressed as data: the real
+language, light-only, 2px ink line work, Patrick Hand, colour rationed to a
+status and one required action. Its three mockups are the spatial rulebook's
+three states — outside / configuring / running — with a screen per device.
+`docs/paper-system/` holds the source rulebook and maps every rule to the
+global, rule or override that carries it, including where the derivation
+deviates from the source.
+
+`viewport-xr-v1` is an invented placeholder, kept so that comparing a mockup
+across two systems means something. It is not a second opinion about the brand.
+
 ## Before changing anything
 
 Read `docs/conventions.md`. The ones broken most:
@@ -131,6 +187,9 @@ Read `docs/conventions.md`. The ones broken most:
   comes from a token. An inlined hex is a value that will not move when the
   system does — which defeats the entire structure above.
 - **Nothing interactive below `--hit-min`.** `--hit-xr` for ray or field use.
+  `--hit-pointer` is the single exception and only on a desktop: a mouse
+  resolves a target a gloved thumb cannot. Reaching for it on a touch or XR
+  screen is the bug it exists to make visible.
 - **State is an ARIA attribute**, not a class: `aria-pressed`, `aria-selected`,
   `aria-expanded`.
 - **Anything floating over the 3D scene needs its own backing.**

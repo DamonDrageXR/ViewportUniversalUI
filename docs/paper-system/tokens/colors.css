@@ -1,0 +1,63 @@
+/* Paper System — Colour tokens
+   Greyscale carries ALL structure. Colour is rationed to exactly two jobs:
+   (1) show a status, (2) outline a required action. Never decoration, never
+   branding, never category colour-coding. Selected = black fill (not colour);
+   disabled = grey + hatch (not colour). Use #1B1B1B, never pure #000000.
+   Hex values sampled directly from the Paper Wireframe Kit (Crayola crayons). */
+
+:root {
+  /* ---- Greyscale · structure (base scale) ---- */
+  --paper-white:   #FFFFFF;
+  --paper-gray-1:  #EEEEEE;
+  --paper-gray-2:  #D8D8D8;
+  --paper-gray-3:  #B4B4B4;
+  --paper-gray-4:  #929292;
+  --paper-gray-5:  #696969;
+  --paper-gray-6:  #454545;
+  --paper-black:   #1B1B1B;
+
+  /* ---- Crayola crayons · the colour reserve (any may denote a status) ---- */
+  --crayon-red:             #E12B56;
+  --crayon-orange:          #FA9247;
+  --crayon-dandelion:       #FFDE75;
+  --crayon-inchworm:        #BCE051;
+  --crayon-green:           #4DA863;
+  --crayon-caribbean-green: #36D4AD;
+  --crayon-robin-egg:       #44CECE;
+  --crayon-blue-green:      #2699B2;
+  --crayon-blue:            #2B71DC;
+  --crayon-purple-heart:    #633DA2;
+  --crayon-pink-flamingo:   #EA82EB;
+  --crayon-razzmatazz:      #E23174;
+
+  /* ---- Semantic aliases ---- */
+  /* surface + ink */
+  --color-ink:            var(--paper-black);   /* all text / line work */
+  --color-ink-muted:      var(--paper-gray-5);  /* secondary text */
+  --color-ink-faint:      var(--paper-gray-4);  /* placeholders, inactive */
+  --color-paper:          var(--paper-white);   /* every surface is white */
+  --color-fill-1:         var(--paper-gray-1);  /* hover fill, track, placeholders */
+  --color-fill-2:         var(--paper-gray-2);  /* press fill, dividers (dashed) */
+  --color-border:         var(--paper-black);   /* standard 2px line */
+  --color-border-soft:    var(--paper-gray-2);  /* faint dividers / box outlines */
+
+  /* status · traffic light (canonical 3-state) */
+  --status-good:     var(--crayon-green);   /* within standard · go */
+  --status-marginal: var(--crayon-orange);  /* usable, watch · caution */
+  --status-poor:     var(--crayon-red);     /* below standard · stop */
+  --status-info:     var(--crayon-blue);    /* informational state */
+
+  /* the one required action — its outline ring (default Blue, any one crayon per app) */
+  --action-ring:     var(--crayon-blue);
+
+  /* unread count badge — Razzmatazz appears ONLY here */
+  --count-badge:     var(--crayon-razzmatazz);
+
+  /* selection is black fill, not a colour */
+  --color-selected:  var(--paper-black);
+
+  /* rings (outlines, NOT drop shadows — the only box-shadow the system allows) */
+  --ring-focus:  0 0 0 3px rgba(27,27,27,.30);
+  --ring-action: 0 0 0 3px var(--action-ring);
+  --ring-inner:  0 0 0 3px rgba(27,27,27,.18);
+}

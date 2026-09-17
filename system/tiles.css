@@ -61,7 +61,11 @@
   border-block: 1px solid var(--border-subtle);
 }
 
-.vp-tile__swatch { flex: 1 1 0; }
+/* Separated by a line rather than by contrast alone: a paper system's four
+   surfaces are all white, and without an edge the strip reads as one empty
+   band instead of as the palette it is. */
+.vp-tile__swatch { flex: 1 1 0; border-left: 1px solid var(--border-subtle); }
+.vp-tile__swatch:first-child { border-left: 0; }
 .vp-tile__swatch--wide { flex: 2 1 0; }
 
 .vp-tile__facts {

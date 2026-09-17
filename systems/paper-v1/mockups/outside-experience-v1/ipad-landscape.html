@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en-AU" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Session browser — Viewport Universal UI</title>
+
+<script src="../../../../systems/manifest.js"></script>
+<script src="../../../../system/use-tokens.js"></script>
+<link rel="stylesheet" href="../../../../system/base.css">
+<link rel="stylesheet" href="../../../../system/components.css">
+<link rel="stylesheet" href="../../../../system/stage.css">
+<link rel="stylesheet" href="../../../../system/nav.css">
+<link rel="stylesheet" href="../../../../system/inspector.css">
+
+<style>
+  .device { --stage-scene: var(--surface-1); }
+
+  .sb { display: flex; width: 100%; height: 100%; }
+
+  /* A full menu is allowed here, because nothing spatial is running behind it.
+     The moment the experience starts this whole column is gone. */
+  .sb__rail {
+    flex: 0 0 var(--panel-width-md);
+    border-right: var(--stroke-hairline) solid var(--border-default);
+    padding: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    min-height: 0;
+  }
+
+  .sb__brand h2 { margin: 0; font-size: var(--text-2xl); font-weight: var(--weight-regular); }
+  .sb__brand p { margin: var(--space-1) 0 0; color: var(--text-secondary); font-size: var(--text-sm); }
+
+  .sb__nav { display: flex; flex-direction: column; gap: var(--space-1); }
+
+  .sb__navitem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: var(--hit-min);
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-md);
+    border: var(--stroke-hairline) solid transparent;
+    background: none;
+    font: inherit;
+    color: var(--text-secondary);
+    cursor: pointer;
+    text-align: left;
+  }
+
+  /* Selected is a black fill, not a colour. Under the rationed-colour rule,
+     "where I am" must never be confused with "something is wrong". */
+  .sb__navitem[aria-current="true"] {
+    background: var(--text-primary);
+    color: var(--surface-1);
+    border-color: var(--text-primary);
+  }
+
+  .sb__main {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-5);
+    gap: var(--space-4);
+  }
+
+  .sb__head { display: flex; align-items: flex-end; gap: var(--space-3); }
+  .sb__head h3 { margin: 0; font-size: var(--text-xl); font-weight: var(--weight-regular); }
+
+  .sb__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+    min-height: 0;
+    overflow-y: auto;
+    align-content: start;
+  }
+
+  .sb__card {
+    border: var(--stroke-hairline) solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    background: var(--surface-raised);
+  }
+
+  .sb__thumb {
+    aspect-ratio: 16 / 9;
+    border: var(--stroke-hairline) dashed var(--border-subtle);
+    border-radius: var(--radius-md);
+    display: grid;
+    place-items: center;
+    color: var(--text-muted);
+  }
+
+  .sb__cardhead { display: flex; align-items: baseline; gap: var(--space-2); }
+  .sb__cardhead b { font-weight: var(--weight-regular); font-size: var(--text-lg); }
+  .sb__meta { color: var(--text-secondary); font-size: var(--text-sm); margin: 0; }
+  .sb__row { display: flex; align-items: center; gap: var(--space-2); }
+</style>
+</head>
+
+<body>
+<main class="stage">
+
+  <header class="stage__header">
+    <h1 class="stage__title">Session browser — iPad landscape</h1>
+    <p class="stage__meta">Target: iPad Pro · 1366×1024 · State 1 of 3 · Status: review · Updated 2026-09-17</p>
+  </header>
+
+  <section class="stage__notes">
+    <h2>Intent</h2>
+    <p>
+      The same first state on the tablet the crew actually carries. A full navigation rail is
+      allowed because there is no spatial view to protect yet — this is the screen where you
+      choose what to open, and it disappears entirely once an experience is running.
+    </p>
+    <h2>Why it is built this way</h2>
+    <ul>
+      <li>Two columns rather than a phone list: at 1366&nbsp;pt wide a single column wastes the screen and pushes the pick below the fold.</li>
+      <li>Every session card is a whole target, not a title link. Gloved hands do not hit 13&nbsp;pt text.</li>
+      <li>The current rail item is filled black. Selection is never a colour here, so it cannot be mistaken for a status.</li>
+      <li>Counts and durations are in the numeral face so they line up down the column.</li>
+    </ul>
+    <h2>Open questions</h2>
+    <ul>
+      <li>Does the thumbnail earn its space before a session has ever been opened, or should the first card be a large "join by code" tile?</li>
+      <li>Archived sessions: a rail item, or a filter on this list?</li>
+    </ul>
+  </section>
+
+  <div class="device device--ipad-landscape" data-device="iPad Pro · landscape · 1366×1024">
+    <div class="device__scene"></div>
+    <div class="device__ui">
+
+      <!-- ===== Mockup starts here ===== -->
+      <div class="sb">
+
+        <div class="sb__rail">
+          <div class="sb__brand">
+            <h2>Viewport</h2>
+            <p>Nothing running — pick a session</p>
+          </div>
+
+          <nav class="sb__nav" aria-label="Sections">
+            <button class="sb__navitem" type="button" aria-current="true">
+              <svg class="vp-icon" aria-hidden="true"><use href="#i-grid"></use></svg>Sessions
+            </button>
+            <button class="sb__navitem" type="button">
+              <svg class="vp-icon" aria-hidden="true"><use href="#i-layers"></use></svg>Scenes and layers
+            </button>
+            <button class="sb__navitem" type="button">
+              <svg class="vp-icon" aria-hidden="true"><use href="#i-folder"></use></svg>Captures
+            </button>
+            <button class="sb__navitem" type="button">
+              <svg class="vp-icon" aria-hidden="true"><use href="#i-settings"></use></svg>Device
+            </button>
+          </nav>
+
+          <span class="u-spacer"></span>
+
+          <div class="vp-readout">
+            <span class="vp-readout__label">This device</span>
+            <span class="vp-readout__value">iPad 7 · 88%</span>
+          </div>
+          <button class="vp-btn vp-btn--secondary vp-btn--block" type="button">Enter a pairing code</button>
+        </div>
+
+        <div class="sb__main">
+          <div class="sb__head">
+            <h3>On this network</h3>
+            <span class="u-spacer"></span>
+            <button class="vp-btn vp-btn--ghost" type="button">
+              <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-search"></use></svg>Find
+            </button>
+          </div>
+
+          <div class="sb__grid">
+
+            <article class="sb__card">
+              <div class="sb__thumb"><svg class="vp-icon vp-icon--lg" aria-hidden="true"><use href="#i-location"></use></svg></div>
+              <div class="sb__cardhead">
+                <b>Mindy South — pit walk</b>
+                <span class="u-spacer"></span>
+                <span class="vp-badge vp-badge--positive">Live</span>
+              </div>
+              <p class="sb__meta">3 in the room · running 14 min · host is the site headset</p>
+              <div class="sb__row">
+                <button class="vp-btn vp-btn--primary" type="button">Join the room</button>
+                <button class="vp-btn vp-btn--ghost" type="button">Watch only</button>
+              </div>
+            </article>
+
+            <article class="sb__card">
+              <div class="sb__thumb"><svg class="vp-icon vp-icon--lg" aria-hidden="true"><use href="#i-layers"></use></svg></div>
+              <div class="sb__cardhead">
+                <b>Nyidi rail corridor</b>
+                <span class="u-spacer"></span>
+                <span class="vp-badge">Review copy</span>
+              </div>
+              <p class="sb__meta">Nobody in the room · last opened 2 days ago</p>
+              <div class="sb__row">
+                <button class="vp-btn vp-btn--secondary" type="button">Open</button>
+              </div>
+            </article>
+
+            <article class="sb__card">
+              <div class="sb__thumb"><svg class="vp-icon vp-icon--lg" aria-hidden="true"><use href="#i-folder"></use></svg></div>
+              <div class="sb__cardhead">
+                <b>The Big Dig — schools build</b>
+                <span class="u-spacer"></span>
+                <span class="vp-badge vp-badge--caution">Draft</span>
+              </div>
+              <p class="sb__meta">Nobody in the room · 2 scenes missing artefacts</p>
+              <div class="sb__row">
+                <button class="vp-btn vp-btn--secondary" type="button">Open</button>
+              </div>
+            </article>
+
+            <article class="sb__card">
+              <div class="sb__thumb"><svg class="vp-icon vp-icon--lg" aria-hidden="true"><use href="#i-eye-off"></use></svg></div>
+              <div class="sb__cardhead">
+                <b>East studies — flood sim</b>
+                <span class="u-spacer"></span>
+                <span class="vp-badge">Needs a rebuild</span>
+              </div>
+              <p class="sb__meta">Scene is newer than the build on this device</p>
+              <div class="sb__row">
+                <button class="vp-btn vp-btn--secondary" type="button" disabled>Open</button>
+                <button class="vp-btn vp-btn--ghost" type="button">Fetch the build</button>
+              </div>
+            </article>
+
+          </div>
+        </div>
+
+      </div>
+      <!-- ===== Mockup ends here ===== -->
+
+    </div>
+  </div>
+
+</main>
+
+<script src="../../../../system/stage.js" defer></script>
+<script src="../../../../system/icons.js"></script>
+<script src="../../../../system/nav.js" defer></script>
+<script src="../../../../system/inspector.js" defer></script>
+</body>
+</html>

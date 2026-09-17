@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en-AU" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wrist menu — Viewport Universal UI</title>
+
+<script src="../../../../systems/manifest.js"></script>
+<script src="../../../../system/use-tokens.js"></script>
+<link rel="stylesheet" href="../../../../system/base.css">
+<link rel="stylesheet" href="../../../../system/components.css">
+<link rel="stylesheet" href="../../../../system/stage.css">
+<link rel="stylesheet" href="../../../../system/nav.css">
+<link rel="stylesheet" href="../../../../system/inspector.css">
+
+<style>
+  /* In a running headset experience there is no screen to put a strip on, so
+     the UI goes on the body or on the object. Three placements, all of which
+     leave the view alone:
+       1. a wrist menu, read by turning the forearm over,
+       2. a strip at keyboard height, below the eye line and curved to the
+          wearer, reached by dropping the hands,
+       3. a menu stuck to the object being worked on.
+     None of them is head-locked. */
+  .aw { position: relative; width: 100%; height: 100%; }
+
+  /* 1. Wrist. Small, close, and only visible when the arm is turned over —
+     which is why it can afford to sit outside the comfort band. */
+  .aw__wrist {
+    position: absolute;
+    left: 16%;
+    bottom: 12%;
+    width: calc(var(--hit-comfortable) * 3);
+    transform: rotate(-11deg);
+    background: var(--surface-1);
+    border: var(--stroke-thin) solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    padding: var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .aw__wristrow { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); }
+
+  .aw__wrist .vp-tool { width: var(--hit-comfortable); height: var(--hit-comfortable); }
+  .aw__wristtools { display: flex; gap: var(--space-2); }
+
+  /* 2. Keyboard-height strip: below the eye line, where the hands already
+     rest. Curved because a flat strip at arm's length is further away at the
+     ends than in the middle. */
+  .aw__strip {
+    position: absolute;
+    left: 50%;
+    bottom: 16%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface-1);
+    border: var(--stroke-thin) solid var(--border-strong);
+    border-radius: var(--radius-pill);
+  }
+
+  .aw__strip .vp-tool { width: var(--hit-xr); height: var(--hit-xr); border-radius: var(--radius-pill); }
+
+  /* 3. Object-stuck menu. Anchored to the thing it acts on, so there is never
+     a question about what it applies to. */
+  .aw__object {
+    position: absolute;
+    top: 28%;
+    right: 20%;
+    background: var(--surface-1);
+    border: var(--stroke-hairline) solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    font-size: var(--text-base);
+  }
+
+  .aw__objecthead {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0 var(--space-2);
+  }
+
+  .aw__objectitem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--hit-min);
+    padding: 0 var(--space-2);
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: none;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  /* A leader line from the menu to the thing it is stuck to. */
+  .aw__leader {
+    position: absolute;
+    top: 38%;
+    right: 34%;
+    width: var(--space-8);
+    border-top: var(--stroke-hairline) dashed var(--border-strong);
+  }
+
+  .aw__tag {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    background: var(--surface-1);
+    border: var(--stroke-hairline) solid var(--border-default);
+    border-radius: var(--radius-pill);
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-base);
+  }
+  .aw__tag--a { top: 24%; left: 24%; }
+
+  .aw__note {
+    position: absolute;
+    background: var(--surface-1);
+    border: var(--stroke-hairline) solid var(--accent);
+    border-radius: var(--radius-sm);
+    padding: 0 var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+  }
+  .aw__note--wrist { left: 14%; bottom: 7%; }
+  .aw__note--strip { left: 50%; bottom: 10%; transform: translateX(-50%); }
+  .aw__note--object { top: 22%; right: 20%; }
+</style>
+</head>
+
+<body>
+<main class="stage">
+
+  <header class="stage__header">
+    <h1 class="stage__title">Wrist menu — headset</h1>
+    <p class="stage__meta">Target: Headset · comfortable FOV · 1280×800 · State 3 of 3 · Status: review · Updated 2026-09-17</p>
+  </header>
+
+  <section class="stage__notes">
+    <h2>Intent</h2>
+    <p>
+      The running experience in a headset, where the rule that the view is sacred bites
+      hardest: there is no screen edge to tuck a strip against, and anything placed in front
+      of the wearer is placed in front of the work. So the interface goes on the body or on the
+      object instead, and the space in front stays empty.
+    </p>
+    <h2>Why it is built this way</h2>
+    <ul>
+      <li>Three placements, none of them head-locked: a <b>wrist menu</b> read by turning the forearm over, a <b>strip at keyboard height</b> reached by dropping the hands, and a <b>menu stuck to the object</b> being worked on.</li>
+      <li>The wrist menu may sit outside the comfort band precisely because it is only visible when the arm is raised and turned — it is summoned, not displayed.</li>
+      <li>The keyboard-height strip sits below the eye line and curves to the wearer, because a flat strip at arm's length is further away at its ends than in its middle.</li>
+      <li>The object-stuck menu removes the question of what a control applies to: it is attached to its subject, with a leader line to prove it.</li>
+      <li>Everything reached by a ray or gaze is <code>--hit-xr</code>. The wrist menu is the exception at <code>--hit-comfortable</code>, because it is touched at 30&nbsp;cm rather than pointed at across the room.</li>
+    </ul>
+    <h2>Open questions</h2>
+    <ul>
+      <li>Do the wrist menu and the keyboard strip both need to exist, or is one of them the fallback for the other?</li>
+      <li>Should the object menu follow the object if the wearer walks around it, or stay on the face it was opened from?</li>
+    </ul>
+  </section>
+
+  <div class="device device--headset" data-device="Headset · comfortable FOV · 1280×800">
+    <div class="device__scene"></div>
+    <div class="device__ui">
+
+      <!-- ===== Mockup starts here ===== -->
+      <div class="aw">
+
+        <span class="aw__tag aw__tag--a">
+          <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-marker"></use></svg>Pit crest — RL 412
+        </span>
+
+        <!-- 3. Object-stuck menu -->
+        <span class="aw__leader" aria-hidden="true"></span>
+        <div class="aw__object" role="menu" aria-label="Haul road 3">
+          <span class="aw__objecthead">Haul road 3</span>
+          <button class="aw__objectitem" type="button" role="menuitem">
+            <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-measure"></use></svg>Measure from here
+          </button>
+          <button class="aw__objectitem" type="button" role="menuitem">
+            <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-eye-off"></use></svg>Hide this layer
+          </button>
+          <button class="aw__objectitem" type="button" role="menuitem">
+            <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-info"></use></svg>What is this?
+          </button>
+        </div>
+        <span class="aw__note aw__note--object">Stuck to the object</span>
+
+        <!-- 1. Wrist menu -->
+        <div class="aw__wrist">
+          <div class="aw__wristrow">
+            <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-location"></use></svg>
+            <span class="vp-readout__value">±0.08 m</span>
+          </div>
+          <div class="aw__wristrow">
+            <span class="vp-badge vp-badge--positive">Tracking</span>
+          </div>
+          <div class="aw__wristtools" role="group" aria-label="Wrist tools">
+            <button class="vp-tool" type="button" aria-label="Measure" aria-pressed="true">
+              <svg class="vp-icon" aria-hidden="true"><use href="#i-measure"></use></svg>
+            </button>
+            <button class="vp-tool" type="button" aria-label="Capture">
+              <svg class="vp-icon" aria-hidden="true"><use href="#i-camera"></use></svg>
+            </button>
+          </div>
+        </div>
+        <span class="aw__note aw__note--wrist">Wrist · turn the arm over</span>
+
+        <!-- 2. Keyboard-height strip -->
+        <div class="aw__strip" role="group" aria-label="Tools">
+          <button class="vp-tool" type="button" aria-label="Place a marker">
+            <svg class="vp-icon vp-icon--lg" aria-hidden="true"><use href="#i-marker"></use></svg>
+          </button>
+          <button class="vp-tool" type="button" aria-label="Section">
+            <svg class="vp-icon vp-icon--lg" aria-hidden="true"><use href="#i-section"></use></svg>
+          </button>
+          <button class="vp-tool" type="button" aria-label="Layers">
+            <svg class="vp-icon vp-icon--lg" aria-hidden="true"><use href="#i-layers"></use></svg>
+          </button>
+          <button class="vp-tool" type="button" aria-label="Leave the room">
+            <svg class="vp-icon vp-icon--lg" aria-hidden="true"><use href="#i-close"></use></svg>
+          </button>
+        </div>
+        <span class="aw__note aw__note--strip">Keyboard height · below eye line</span>
+
+      </div>
+      <!-- ===== Mockup ends here ===== -->
+
+    </div>
+  </div>
+
+</main>
+
+<script src="../../../../system/stage.js" defer></script>
+<script src="../../../../system/icons.js"></script>
+<script src="../../../../system/nav.js" defer></script>
+<script src="../../../../system/inspector.js" defer></script>
+</body>
+</html>

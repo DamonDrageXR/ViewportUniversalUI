@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en-AU" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reach zones — Viewport Universal UI</title>
+
+<script src="../../../../systems/manifest.js"></script>
+<script src="../../../../system/use-tokens.js"></script>
+<link rel="stylesheet" href="../../../../system/base.css">
+<link rel="stylesheet" href="../../../../system/components.css">
+<link rel="stylesheet" href="../../../../system/stage.css">
+<link rel="stylesheet" href="../../../../system/nav.css">
+<link rel="stylesheet" href="../../../../system/inspector.css">
+
+<style>
+  /* State 3. The view is the product; the interface is a set of thin strips
+     around the edge of it. Nothing here is wider than 96 px, and nothing at
+     all sits in the middle of the screen. */
+  .ax { position: relative; width: 100%; height: 100%; }
+
+  /* A capsule strip, floated in a corner arc rather than pinned to the edge:
+     a tablet is held by the corners, so the corners are what the thumbs
+     reach. 96 px is the cap. */
+  .ax__strip {
+    position: absolute;
+    display: flex;
+    gap: var(--space-2);
+    padding: var(--space-2);
+    background: var(--surface-1);
+    border: var(--stroke-hairline) solid var(--border-default);
+    border-radius: var(--radius-pill);
+  }
+
+  .ax__strip--left  { left: var(--space-5);  bottom: var(--space-5); flex-direction: column; }
+  .ax__strip--right { right: var(--space-5); bottom: var(--space-5); flex-direction: column; }
+  .ax__strip--top   { top: var(--space-5);   left: 50%; transform: translateX(-50%); }
+
+  /* A control inside a pill-shaped strip takes a pill radius too. The corner
+     chain is r_inner = r_outer - gap, and once the outer corner is fully round
+     the inner one has to be as well, or the selected tool's black fill sits in
+     the strip as a square peg. */
+  .ax__strip .vp-tool { width: var(--hit-min); height: var(--hit-min); border-radius: var(--radius-pill); }
+
+  /* A long element — timeline, carousel, scrubber — is bottom-only, full
+     width, and MUST have an arrow button at each end. Swipe alone fails with
+     gloves on and fails completely one-handed. */
+  .ax__timeline {
+    position: absolute;
+    left: 15%;
+    right: 15%;
+    bottom: var(--space-5);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2);
+    background: var(--surface-1);
+    border: var(--stroke-hairline) solid var(--border-default);
+    border-radius: var(--radius-pill);
+  }
+
+  .ax__timeline .vp-tool { width: var(--hit-min); height: var(--hit-min); flex: 0 0 auto; border-radius: var(--radius-pill); }
+
+  .ax__track {
+    flex: 1 1 auto;
+    height: var(--stroke-thick);
+    background: var(--surface-sunken);
+    border-radius: var(--radius-pill);
+    position: relative;
+  }
+
+  .ax__fill {
+    position: absolute;
+    inset: 0 58% 0 0;
+    background: var(--text-primary);
+    border-radius: var(--radius-pill);
+  }
+
+  .ax__knob {
+    position: absolute;
+    left: 42%;
+    top: 50%;
+    width: var(--hit-min);
+    height: var(--hit-min);
+    transform: translate(-50%, -50%);
+    background: var(--surface-1);
+    border: var(--stroke-hairline) solid var(--border-default);
+    border-radius: var(--radius-pill);
+    display: grid;
+    place-items: center;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+  }
+
+  /* Review furniture: the zones the rule is actually about. */
+  .ax__arc {
+    position: absolute;
+    bottom: 0;
+    width: 30%;
+    aspect-ratio: 1;
+    border: var(--stroke-hairline) dashed var(--status-positive);
+    border-radius: 100% 0 0 0;
+    pointer-events: none;
+  }
+  .ax__arc--l { left: 0; border-radius: 0 100% 0 0; }
+  .ax__arc--r { right: 0; border-radius: 100% 0 0 0; }
+
+  .ax__ow {
+    position: absolute;
+    left: 34%;
+    right: 34%;
+    top: 22%;
+    bottom: 26%;
+    border: var(--stroke-hairline) dashed var(--status-critical);
+    border-radius: var(--radius-lg);
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+  }
+
+  .ax__note {
+    background: var(--surface-1);
+    border: var(--stroke-hairline) solid var(--border-default);
+    border-radius: var(--radius-sm);
+    padding: 0 var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+  }
+
+  /* Clear of the strips: a label that sits under the thing it is labelling is
+     no use in a review. */
+  .ax__arcnote { position: absolute; bottom: 30%; }
+  .ax__arcnote--l { left: var(--space-3); }
+  .ax__arcnote--r { right: var(--space-3); }
+
+  .ax__tag {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    background: var(--surface-1);
+    border: var(--stroke-hairline) solid var(--border-default);
+    border-radius: var(--radius-pill);
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-sm);
+  }
+  .ax__tag--a { top: 30%; left: 20%; }
+  .ax__tag--b { top: 18%; right: 22%; opacity: 0.5; font-size: var(--text-xs); }
+</style>
+</head>
+
+<body>
+<main class="stage">
+
+  <header class="stage__header">
+    <h1 class="stage__title">Reach zones — iPad landscape</h1>
+    <p class="stage__meta">Target: iPad Pro · 1366×1024 · State 3 of 3 · Status: review · Updated 2026-09-17</p>
+  </header>
+
+  <section class="stage__notes">
+    <h2>Intent</h2>
+    <p>
+      The experience is running, which makes the view the product and the interface a visitor.
+      Everything collapses to thin strips around the edge, placed where the thumbs of a held
+      tablet actually are — and the middle of the screen is left alone, because it is both the
+      thing being looked at and the hardest place on the device to reach.
+    </p>
+    <h2>Why it is built this way</h2>
+    <ul>
+      <li>Strips of 96&nbsp;px or less, so the view keeps at least 85% of the screen. That budget is what stops the UI creeping back.</li>
+      <li>Controls live in the corner arcs, roughly 60–80° from where the thumbs sit on a two-handed grip. The centre is the "ow zone", marked here in red: reaching it means letting go of the tablet.</li>
+      <li>The timeline is bottom-only, full width, <b>with an arrow button at each end</b>. Swipe is offered as well, never instead — swipe fails with gloves and fails one-handed.</li>
+      <li>Every control is at least a 44&nbsp;pt touch target even though the strips are thin. Thin strip, big targets: those are not in conflict.</li>
+      <li>The strips are opaque paper with a real border, because they sit over a live camera feed.</li>
+    </ul>
+    <h2>Open questions</h2>
+    <ul>
+      <li>Two corner strips plus a timeline is three things at the bottom edge. Does the timeline want its own state, shown only while scrubbing?</li>
+      <li>Should the left strip mirror for a left-handed grip, or is the layout symmetrical enough already?</li>
+    </ul>
+  </section>
+
+  <div class="device device--ipad-landscape" data-device="iPad Pro · landscape · 1366×1024">
+    <div class="device__scene"></div>
+    <div class="device__ui">
+
+      <!-- ===== Mockup starts here ===== -->
+      <div class="ax">
+
+        <span class="ax__tag ax__tag--a">
+          <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-marker"></use></svg>Pit crest — RL 412
+        </span>
+        <span class="ax__tag ax__tag--b">Haul road 3</span>
+
+        <!-- Review furniture: the zones, not the interface -->
+        <div class="ax__arc ax__arc--l" aria-hidden="true"></div>
+        <div class="ax__arc ax__arc--r" aria-hidden="true"></div>
+        <span class="ax__note ax__arcnote ax__arcnote--l">Thumb arc 60–80°</span>
+        <span class="ax__note ax__arcnote ax__arcnote--r">Thumb arc 60–80°</span>
+        <div class="ax__ow" aria-hidden="true"><span class="ax__note">Ow zone — nothing goes here</span></div>
+
+        <!-- Status only. Read, never reached for. -->
+        <div class="ax__strip ax__strip--top">
+          <span class="vp-badge vp-badge--positive">Tracking</span>
+          <span class="vp-readout__value">±0.08 m</span>
+          <span class="vp-badge">3 in the room</span>
+        </div>
+
+        <div class="ax__strip ax__strip--left" role="group" aria-label="Tools">
+          <button class="vp-tool" type="button" aria-label="Measure" aria-pressed="true">
+            <svg class="vp-icon" aria-hidden="true"><use href="#i-measure"></use></svg>
+          </button>
+          <button class="vp-tool" type="button" aria-label="Place a marker">
+            <svg class="vp-icon" aria-hidden="true"><use href="#i-marker"></use></svg>
+          </button>
+          <button class="vp-tool" type="button" aria-label="Section">
+            <svg class="vp-icon" aria-hidden="true"><use href="#i-section"></use></svg>
+          </button>
+        </div>
+
+        <div class="ax__strip ax__strip--right" role="group" aria-label="View">
+          <button class="vp-tool" type="button" aria-label="Layers">
+            <svg class="vp-icon" aria-hidden="true"><use href="#i-layers"></use></svg>
+          </button>
+          <button class="vp-tool" type="button" aria-label="Capture">
+            <svg class="vp-icon" aria-hidden="true"><use href="#i-camera"></use></svg>
+          </button>
+          <button class="vp-tool" type="button" aria-label="Leave the room">
+            <svg class="vp-icon" aria-hidden="true"><use href="#i-close"></use></svg>
+          </button>
+        </div>
+
+        <!-- Long element: bottom-only, arrows at both ends, swipe as well -->
+        <div class="ax__timeline" role="group" aria-label="Timeline">
+          <button class="vp-tool" type="button" aria-label="Step back">
+            <svg class="vp-icon" aria-hidden="true"><use href="#i-arrow-left"></use></svg>
+          </button>
+          <div class="ax__track">
+            <span class="ax__fill"></span>
+            <span class="ax__knob">42%</span>
+          </div>
+          <button class="vp-tool" type="button" aria-label="Step forward">
+            <svg class="vp-icon" aria-hidden="true"><use href="#i-arrow-right"></use></svg>
+          </button>
+        </div>
+
+      </div>
+      <!-- ===== Mockup ends here ===== -->
+
+    </div>
+  </div>
+
+</main>
+
+<script src="../../../../system/stage.js" defer></script>
+<script src="../../../../system/icons.js"></script>
+<script src="../../../../system/nav.js" defer></script>
+<script src="../../../../system/inspector.js" defer></script>
+</body>
+</html>

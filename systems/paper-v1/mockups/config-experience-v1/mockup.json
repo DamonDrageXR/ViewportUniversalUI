@@ -1,0 +1,12 @@
+{
+  "title": "Configuring, experience held",
+  "status": "review",
+  "summary": "State 2: the spatial view is live but held. Exactly one wide, edge-justified panel, never more than 35% of the screen, and the view never closes behind it.",
+  "created": "2026-09-17",
+  "updated": "2026-09-17",
+  "screens": [
+    { "device": "ipad-landscape", "file": "ipad-landscape.html", "title": "Place the model" },
+    { "device": "desktop", "file": "desktop.html", "title": "Scene setup" },
+    { "device": "headset", "file": "headset.html", "title": "Anchored panel" }
+  ]
+}

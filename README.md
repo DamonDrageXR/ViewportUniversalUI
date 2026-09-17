@@ -27,9 +27,9 @@ icons, menus, panels, trees.
 
 **Mockups** — what that language looks like on a device. **One tile per mockup**,
 holding a screen for each device it covers: phone, iPad portrait, iPad
-landscape. Pick a different system at the top and every screen re-renders with
-it, so a palette or density change can be judged on real screens before you
-commit to it.
+landscape, desktop, headset. Pick a different system at the top and every
+screen re-renders with it, so a palette, line weight or density change can be
+judged on real screens before you commit to it.
 
 ## A system reads top to bottom
 
@@ -58,9 +58,10 @@ Delete, and that asks first.
 
 ## Globals cascade, and cannot break contrast
 
-A system is derived from about eleven values — accent, neutral hue, corner
-radius, spacing unit, base text size, type scale, fonts, density, panel
-opacity. Everything else falls out of those.
+A system is derived from about sixteen values — accent, the three status hues,
+neutral hue and saturation, corner radius, line weight, icon stroke ratio,
+spacing unit, base text size, type scale, fonts, density, panel opacity.
+Everything else falls out of those.
 
 The colours that carry text are **derived rather than picked**: `--accent-solid`
 (the fill behind white text) and `--accent-fg` (accent text on a tinted chip)
@@ -120,10 +121,43 @@ and every interactive element against `--hit-min`. Exits non-zero on failure.
 
 ## The Paper System
 
-`docs/paper-system/` is the slot for the Paper System — Viewport XR source
-documents, and it is still empty. Until they land, the `Viewport XR v1` system
-carries a placeholder palette. Dropping the real values in is a change to one
-system's globals — see [`docs/paper-system/README.md`](docs/paper-system/README.md).
+`systems/paper-v1` **is** the Paper System — Viewport XR, expressed as data:
+light-only, 2px ink line work, Patrick Hand, greyscale carrying all structure,
+and colour rationed to a status or the single required action. Its three
+mockups are the spatial rulebook's three states — outside the experience,
+configuring it, running it — with a screen per device.
+
+`systems/viewport-xr-v1` is an invented placeholder, kept because comparing one
+mockup across two systems is what the Mockups view is for.
+
+[`docs/paper-system/`](docs/paper-system/) holds the source rulebook and maps
+every Paper rule to the global, rule or override that carries it — including
+the four places the derivation deviates from the source, and why.
+
+**Patrick Hand is not bundled.** It falls back to Bradley Hand then Comic Sans,
+which is recognisably hand-drawn but is not the right face. Install the font,
+or bundle the OFL `.woff2` and add an `@font-face` to `system/base.css`.
+
+## Rules, not just tokens
+
+Two systems can share every token and still not be the same language. So a
+system also declares **rules** — whether a treatment is allowed at all:
+
+| Rule | What it decides |
+| --- | --- |
+| `shadows` | Soft shadows, or none at all — hierarchy from border, fill, size and spacing. |
+| `buttonFill` | Accent fill on the primary action, or paper-only with a ring. |
+| `colourPolicy` | Open, or rationed to status and the one required action. |
+| `disabledPattern` | Dimmed, or grey plus a 45° hatch. |
+| `themes` | Both, light-only or dark-only. |
+| `controlFeedback` | Shade the fill, or the grey ladder for unfilled controls. |
+| `numeralFace` | Interface face, or monospace for anything read as a number. |
+| `dividerStyle` | Solid, or dashed so it reads as drafted. |
+
+They live in the Rules panel on a system's page, next to the globals. A rule
+added to `system/schema.json` and styled in the RULES LAYER of
+`system/components.css` becomes available to every system at once, which is the
+point of keeping them out of any one system's CSS.
 
 ## Conventions
 
@@ -139,4 +173,4 @@ Eight rules, each with the reason it exists:
 | `/mockup` | Build a new mockup from a description. |
 | `/iterate` | Revise an existing mockup against feedback. |
 | `/audit` | Run the audit and fix every finding. |
-| `/tokens` | Apply the Paper System palette to a system's globals. |
+| `/tokens` | Derive a system's globals and rules from a source design system. |

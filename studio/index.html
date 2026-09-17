@@ -89,16 +89,22 @@
   const load = async () => {
     const { systems } = await api("GET", "/state");
     window.__systems = systems;
-    render(systems.map((s) => ({
-      ...s,
-      accent: s.resolved.dark["--accent"],
-      lineWeight: s.globals?.lineWeight ?? 1,
-      surfaces: [
-        s.resolved.dark["--surface-0"], s.resolved.dark["--surface-1"],
-        s.resolved.dark["--surface-2"], s.resolved.dark["--surface-raised"],
-      ],
-      isLatest: !systems.some((o) => o.family === s.family && o.version > s.version),
-    })));
+    render(systems.map((s) => {
+      // The tile advertises the palette the system ACTUALLY has. Reading the
+      // dark theme unconditionally showed a light-only system as four dark
+      // swatches — a palette it does not contain.
+      const theme = s.resolved[s.resolved.themes?.[0] ?? "dark"];
+      return {
+        ...s,
+        accent: theme["--accent"],
+        lineWeight: s.globals?.lineWeight ?? 1,
+        surfaces: [
+          theme["--surface-0"], theme["--surface-1"],
+          theme["--surface-2"], theme["--surface-raised"],
+        ],
+        isLatest: !systems.some((o) => o.family === s.family && o.version > s.version),
+      };
+    }));
   };
 
   const find = (id) => [...host.querySelectorAll("[data-system]")]

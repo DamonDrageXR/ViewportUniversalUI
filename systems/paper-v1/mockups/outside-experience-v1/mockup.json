@@ -1,0 +1,12 @@
+{
+  "title": "Outside the experience",
+  "status": "review",
+  "summary": "State 1 of the spatial rulebook: nothing spatial is running yet, so the UI owns the whole screen and is plain paper. Joining is a pairing code or a room, never a web sign-in.",
+  "created": "2026-09-17",
+  "updated": "2026-09-17",
+  "screens": [
+    { "device": "phone", "file": "phone.html", "title": "Join a room" },
+    { "device": "ipad-landscape", "file": "ipad-landscape.html", "title": "Session browser" },
+    { "device": "desktop", "file": "desktop.html", "title": "Operator console" }
+  ]
+}

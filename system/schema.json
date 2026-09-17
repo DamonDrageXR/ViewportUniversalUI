@@ -1,5 +1,5 @@
 {
-  "note": "Describes what a design system contains and how each part may be edited. The studio builds its editors from this file, so a group's `control` is what constrains the UI \u2014 a colour group can only ever offer colour controls. Adding a token here adds it to the editor; nothing in the studio is hand-wired.",
+  "note": "Describes what a design system contains and how each part may be edited. The studio builds its editors from this file, so a group's `control` is what constrains the UI — a colour group can only ever offer colour controls. Adding a token here adds it to the editor; nothing in the studio is hand-wired.",
   "globals": [
     {
       "id": "accent",
@@ -7,6 +7,25 @@
       "control": "color",
       "default": "#1e88ff",
       "note": "Drives the whole accent ramp. The fill used behind white text is derived from this and is forced to clear 4.5:1, so this cannot be set to something that breaks contrast."
+    },
+    {
+      "id": "statusPositive",
+      "label": "Status — good",
+      "control": "color",
+      "default": "#1f9d63",
+      "note": "The “all clear” hue. Its readable text colour is derived, not picked."
+    },
+    {
+      "id": "statusCaution",
+      "label": "Status — marginal",
+      "control": "color",
+      "default": "#d98a10"
+    },
+    {
+      "id": "statusCritical",
+      "label": "Status — poor",
+      "control": "color",
+      "default": "#d9453f"
     },
     {
       "id": "neutralHue",
@@ -52,6 +71,16 @@
       "note": "Base stroke thickness. Borders, dividers and icon strokes all scale from it, so icons thicken with the rest of the system rather than drifting."
     },
     {
+      "id": "iconStroke",
+      "label": "Icon stroke ratio",
+      "control": "number",
+      "min": 0.5,
+      "max": 2.5,
+      "step": 0.1,
+      "default": 1.6,
+      "note": "Icon stroke as a multiple of the line weight. Icons carry no stroke-width of their own, so this and the line weight together set it — 1.0 keeps icons exactly as heavy as a border."
+    },
+    {
       "id": "spaceUnit",
       "label": "Spacing unit",
       "control": "length",
@@ -87,7 +116,7 @@
       "label": "Interface font",
       "control": "font",
       "default": "system",
-      "note": "System stacks only \u2014 a mockup must render identically offline, with no font to fetch or licence."
+      "note": "System stacks only — a mockup must render identically offline, with no font to fetch or licence."
     },
     {
       "id": "fontMono",
@@ -104,15 +133,15 @@
       "options": [
         {
           "value": "compact",
-          "label": "Compact \u2014 desktop review"
+          "label": "Compact — desktop review"
         },
         {
           "value": "comfortable",
-          "label": "Comfortable \u2014 tablet"
+          "label": "Comfortable — tablet"
         },
         {
           "value": "field",
-          "label": "Field \u2014 gloves, sun, ray targeting"
+          "label": "Field — gloves, sun, ray targeting"
         }
       ],
       "note": "Sets the hit-target floors. Field pushes every control to 64px."
@@ -244,6 +273,30 @@
         {
           "id": "--status-critical-solid",
           "label": "Critical fill"
+        }
+      ]
+    },
+    {
+      "id": "border",
+      "label": "Border colour",
+      "control": "color",
+      "note": "Interactive borders need 3:1 against their surface (WCAG 1.4.11); decorative dividers are exempt, so an input border being darker than a table rule is correct, not an inconsistency.",
+      "tokens": [
+        {
+          "id": "--border-subtle",
+          "label": "Subtle — dividers"
+        },
+        {
+          "id": "--border-default",
+          "label": "Default"
+        },
+        {
+          "id": "--border-strong",
+          "label": "Strong — controls"
+        },
+        {
+          "id": "--border-focus",
+          "label": "Focus ring"
         }
       ]
     },
@@ -425,6 +478,15 @@
         {
           "id": "--hit-xr",
           "label": "Ray / field"
+        },
+        {
+          "id": "--hit-pointer",
+          "label": "Pointer — desktop only",
+          "note": "The only target allowed below the touch minimum, and only on a pointer device."
+        },
+        {
+          "id": "--row-pointer",
+          "label": "Pointer table row"
         }
       ]
     },
@@ -517,6 +579,165 @@
       "label": "Classic mono",
       "stack": "\"Courier New\", Courier, ui-monospace, monospace",
       "variant": "mono"
+    },
+    {
+      "value": "hand",
+      "label": "Hand-drawn (Patrick Hand)",
+      "stack": "\"Patrick Hand\", \"Bradley Hand\", \"Comic Sans MS\", cursive",
+      "note": "Wireframe/paper systems. Falls back to faces present on Windows and macOS."
+    },
+    {
+      "value": "numeral",
+      "label": "Numeral / meta (Inter)",
+      "stack": "\"Inter\", \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif",
+      "note": "Aligned digits for charts and tiny meta labels."
+    }
+  ],
+  "rules": [
+    {
+      "id": "shadows",
+      "label": "Elevation",
+      "control": "select",
+      "default": "soft",
+      "options": [
+        {
+          "value": "soft",
+          "label": "Soft shadows"
+        },
+        {
+          "value": "none",
+          "label": "None — hierarchy from border, fill, size, spacing"
+        }
+      ],
+      "note": "`none` sets every --shadow-* token to none, so a component that reaches for one gets nothing rather than silently keeping a shadow.",
+      "tokens": [
+        "--shadow-1",
+        "--shadow-2",
+        "--shadow-3",
+        "--shadow-4"
+      ]
+    },
+    {
+      "id": "buttonFill",
+      "label": "Button fill",
+      "control": "select",
+      "default": "accent",
+      "options": [
+        {
+          "value": "accent",
+          "label": "Accent fill on the primary action"
+        },
+        {
+          "value": "paper",
+          "label": "Paper only — size sets hierarchy, the required action carries a ring"
+        }
+      ],
+      "note": "`paper` is the Paper System rule: no button is ever filled with colour."
+    },
+    {
+      "id": "colourPolicy",
+      "label": "Colour policy",
+      "control": "select",
+      "default": "open",
+      "options": [
+        {
+          "value": "open",
+          "label": "Open — accent may carry emphasis anywhere"
+        },
+        {
+          "value": "rationed",
+          "label": "Rationed — status and the one required action only"
+        }
+      ],
+      "note": "Audited, not merely documented: `rationed` fails the audit if a colour token is used for decoration."
+    },
+    {
+      "id": "disabledPattern",
+      "label": "Disabled treatment",
+      "control": "select",
+      "default": "dim",
+      "options": [
+        {
+          "value": "dim",
+          "label": "Dimmed text and fill"
+        },
+        {
+          "value": "hatch-45",
+          "label": "Grey plus a 45° hatch"
+        }
+      ],
+      "note": "A hatch reads as unavailable without relying on contrast, which is why the paper language uses it."
+    },
+    {
+      "id": "themes",
+      "label": "Themes",
+      "control": "select",
+      "default": "both",
+      "options": [
+        {
+          "value": "both",
+          "label": "Dark and light"
+        },
+        {
+          "value": "light-only",
+          "label": "Light only"
+        },
+        {
+          "value": "dark-only",
+          "label": "Dark only"
+        }
+      ],
+      "note": "A paper system has one ground: white. `light-only` emits the light tokens into :root and the audit stops testing a theme the system does not have."
+    },
+    {
+      "id": "controlFeedback",
+      "label": "Hover and press feedback",
+      "control": "select",
+      "default": "fill",
+      "options": [
+        {
+          "value": "fill",
+          "label": "Shade the fill"
+        },
+        {
+          "value": "grey-ladder",
+          "label": "Grey ladder — for controls that have no fill"
+        }
+      ],
+      "note": "An unfilled control cannot show hover as “a lighter version of the fill”, because there is no fill. `grey-ladder` mixes the steps from the ink token so they stay right in any palette."
+    },
+    {
+      "id": "numeralFace",
+      "label": "Numerals",
+      "control": "select",
+      "default": "inherit",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Same face as the interface"
+        },
+        {
+          "value": "mono",
+          "label": "Monospace face for anything read as a number"
+        }
+      ],
+      "note": "A hand-drawn or display face has no aligned figures, so a readout, count or measurement set in it is hard to compare down a column. `mono` is an implementation detail of the number, not a second interface typeface."
+    },
+    {
+      "id": "dividerStyle",
+      "label": "Dividers",
+      "control": "select",
+      "default": "solid",
+      "options": [
+        {
+          "value": "solid",
+          "label": "Solid"
+        },
+        {
+          "value": "dashed",
+          "label": "Dashed — reads as drafted, not decided"
+        }
+      ]
     }
   ]
 }

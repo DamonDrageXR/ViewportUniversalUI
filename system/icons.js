@@ -59,7 +59,15 @@
     "i-menu": '<path d="M4 7h16M4 12h16M4 17h16"/>',
     "i-more": '<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',
     "i-chevron-right": '<path d="m9 5 7 7-7 7"/>',
+    "i-chevron-left": '<path d="m15 5-7 7 7 7"/>',
     "i-chevron-down": '<path d="m5 9 7 7 7-7"/>',
+    "i-chevron-up": '<path d="m5 15 7-7 7 7"/>',
+    /* Both directions exist because the rulebook requires an arrow button at
+       each end of any long element — a timeline, a carousel, a scrubber. A
+       right chevron doing double duty for "back" is the bug that requirement
+       is there to prevent. */
+    "i-arrow-left": '<path d="M20 12H4"/><path d="m10 6-6 6 6 6"/>',
+    "i-arrow-right": '<path d="M4 12h16"/><path d="m14 6 6 6-6 6"/>',
     "i-info": '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
     "i-warning": '<path d="M12 4 2.5 20h19z"/><path d="M12 10v4M12 17h.01"/>',
     "i-sun": '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/>',

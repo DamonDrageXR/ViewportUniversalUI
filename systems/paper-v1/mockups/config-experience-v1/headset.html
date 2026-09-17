@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en-AU" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anchored panel — Viewport Universal UI</title>
+
+<script src="../../../../systems/manifest.js"></script>
+<script src="../../../../system/use-tokens.js"></script>
+<link rel="stylesheet" href="../../../../system/base.css">
+<link rel="stylesheet" href="../../../../system/components.css">
+<link rel="stylesheet" href="../../../../system/stage.css">
+<link rel="stylesheet" href="../../../../system/nav.css">
+<link rel="stylesheet" href="../../../../system/inspector.css">
+
+<style>
+  /* A headset panel is not a screen edge — there is no edge. It is anchored in
+     the world about a metre out and a little below the eye line, and it stays
+     where the room is when the head turns. The vignette on the frame is the
+     comfortable-reading region: anything outside it needs a head turn. */
+  .hs { position: relative; width: 100%; height: 100%; }
+
+  /* Sat inside the comfort band: within ±30° of the eye line, and biased below
+     centre because looking down is cheaper than looking up. */
+  .hs__panel {
+    position: absolute;
+    left: 50%;
+    top: 56%;
+    transform: translate(-50%, -50%);
+    width: 34%;
+    background: var(--surface-1);
+    border: var(--stroke-thin) solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    max-height: 62%;
+  }
+
+  .hs__head { padding: var(--space-4); border-bottom: var(--stroke-hairline) dashed var(--border-subtle); }
+  .hs__head h3 { margin: 0; font-size: var(--text-2xl); font-weight: var(--weight-regular); }
+  .hs__head p { margin: var(--space-1) 0 0; color: var(--text-secondary); }
+
+  .hs__body {
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    overflow-y: auto;
+    min-height: 0;
+  }
+
+  .hs__foot { padding: var(--space-4); border-top: var(--stroke-hairline) solid var(--border-default); display: flex; gap: var(--space-3); }
+
+  /* Everything in a headset is gaze- or ray-targeted, so the floor is the XR
+     hit size, not the touch one. --hit-xr on every control, no exceptions. */
+  .hs__panel .vp-btn { min-height: var(--hit-xr); font-size: var(--text-lg); }
+
+  /* Type at a metre needs more than type at arm's length: the body floor here
+     is a step up from the tablet's. */
+  .hs__panel { font-size: var(--text-lg); }
+
+  .hs__row { display: flex; align-items: center; gap: var(--space-3); }
+
+  .hs__grouplabel {
+    font-size: var(--text-sm);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* World-anchored labels again — same rule as the tablet, and the reason they
+     can sit outside the comfort band without breaking anything: you are not
+     meant to reach them. */
+  .hs__tag {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    background: var(--surface-1);
+    border: var(--stroke-hairline) solid var(--border-default);
+    border-radius: var(--radius-pill);
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-base);
+  }
+  .hs__tag--a { top: 22%; left: 18%; }
+  .hs__tag--b { top: 30%; right: 16%; opacity: 0.5; font-size: var(--text-sm); }
+
+  /* Review furniture: the comfort band the panel has to sit inside. */
+  .hs__band {
+    position: absolute;
+    inset: 12% 19%;
+    border: var(--stroke-hairline) dashed var(--accent);
+    border-radius: 50% / 34%;
+    pointer-events: none;
+  }
+  .hs__bandtag {
+    position: absolute;
+    top: 12%;
+    left: 50%;
+    transform: translate(-50%, -140%);
+    background: var(--surface-1);
+    border: var(--stroke-hairline) solid var(--accent);
+    border-radius: var(--radius-sm);
+    padding: 0 var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+  }
+</style>
+</head>
+
+<body>
+<main class="stage">
+
+  <header class="stage__header">
+    <h1 class="stage__title">Anchored panel — headset</h1>
+    <p class="stage__meta">Target: Headset · comfortable FOV · 1280×800 · State 2 of 3 · Status: review · Updated 2026-09-17</p>
+  </header>
+
+  <section class="stage__notes">
+    <h2>Intent</h2>
+    <p>
+      The same held state in a headset. The panel does the same job as the tablet's, but the
+      constraints swap: there is no screen edge to justify against, so the panel is anchored in
+      the room instead — about a metre out, slightly below the eye line, and it stays where the
+      room is when you turn your head.
+    </p>
+    <h2>Why it is built this way</h2>
+    <ul>
+      <li><b>Never head-locked.</b> A panel welded to the view cannot be looked away from, and that is what makes people take a headset off.</li>
+      <li>Inside the comfort band — within ±30° of the eye line, biased below centre, because looking down is cheaper than looking up.</li>
+      <li>Every control is <code>--hit-xr</code>: gaze and ray targeting need a bigger floor than a fingertip, so the touch minimum does not apply here.</li>
+      <li>Body type steps up a size. 17&nbsp;pt at arm's length and 21&nbsp;pt at a metre are the same apparent size, and the headset is the metre case.</li>
+      <li>Opaque panel with the heavy edge, same as the tablet: it is composited over a live room and has to hold its own contrast.</li>
+    </ul>
+    <h2>Open questions</h2>
+    <ul>
+      <li>Should the panel re-anchor if the wearer walks away from it, or wait to be recalled? Shown as staying put.</li>
+      <li>Is a two-button footer enough at this size, or does "start" want to be the only thing in it?</li>
+    </ul>
+  </section>
+
+  <div class="device device--headset" data-device="Headset · comfortable FOV · 1280×800">
+    <div class="device__scene"></div>
+    <div class="device__ui">
+
+      <!-- ===== Mockup starts here ===== -->
+      <div class="hs">
+
+        <span class="hs__tag hs__tag--a">
+          <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-marker"></use></svg>Pit crest — RL 412
+        </span>
+        <span class="hs__tag hs__tag--b">Haul road 3</span>
+
+        <div class="hs__band" aria-hidden="true"></div>
+        <span class="hs__bandtag">Comfort band · ±30° of eye line</span>
+
+        <aside class="hs__panel">
+          <div class="hs__head">
+            <h3>Place the model</h3>
+            <p>Anchored 1 m out · not head-locked</p>
+          </div>
+
+          <div class="hs__body">
+            <div class="hs__row">
+              <span class="hs__grouplabel">Anchor</span>
+              <span class="u-spacer"></span>
+              <span class="vp-badge vp-badge--positive">Survey mark · ±0.08 m</span>
+            </div>
+
+            <div class="vp-segmented" role="group" aria-label="Anchor method">
+              <button class="vp-segmented__option" type="button" aria-pressed="true">Survey mark</button>
+              <button class="vp-segmented__option" type="button" aria-pressed="false">Plane</button>
+            </div>
+
+            <div class="hs__row">
+              <span class="hs__grouplabel">Height</span>
+              <span class="u-spacer"></span>
+              <span class="vp-readout__value">RL 412.4</span>
+            </div>
+
+            <label class="vp-toggle">
+              <input type="checkbox" checked>
+              <span class="vp-toggle__track"><span class="vp-toggle__thumb"></span></span>
+              <span>Show the pit outline</span>
+            </label>
+            <label class="vp-toggle">
+              <input type="checkbox">
+              <span class="vp-toggle__track"><span class="vp-toggle__thumb"></span></span>
+              <span>Show vegetation</span>
+            </label>
+          </div>
+
+          <div class="hs__foot">
+            <button class="vp-btn vp-btn--primary vp-btn--block" type="button">Start the walk</button>
+            <button class="vp-btn vp-btn--ghost" type="button">Cancel</button>
+          </div>
+        </aside>
+
+      </div>
+      <!-- ===== Mockup ends here ===== -->
+
+    </div>
+  </div>
+
+</main>
+
+<script src="../../../../system/stage.js" defer></script>
+<script src="../../../../system/icons.js"></script>
+<script src="../../../../system/nav.js" defer></script>
+<script src="../../../../system/inspector.js" defer></script>
+</body>
+</html>

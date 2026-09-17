@@ -1,0 +1,8 @@
+/* Paper System — Webfonts
+   Patrick Hand is the single UI typeface (all text). Inter is used ONLY for
+   chart numerals and tiny meta labels so digits stay aligned — it is an
+   implementation detail of the chart/meta layer, never a second UI typeface.
+   Both are served from Google Fonts; the @import below pulls their @font-face
+   declarations into the design-system closure. */
+
+@import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;500;600;700&display=swap');

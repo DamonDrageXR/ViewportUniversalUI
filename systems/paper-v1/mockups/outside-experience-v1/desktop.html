@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en-AU" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Operator console — Viewport Universal UI</title>
+
+<script src="../../../../systems/manifest.js"></script>
+<script src="../../../../system/use-tokens.js"></script>
+<link rel="stylesheet" href="../../../../system/base.css">
+<link rel="stylesheet" href="../../../../system/components.css">
+<link rel="stylesheet" href="../../../../system/stage.css">
+<link rel="stylesheet" href="../../../../system/nav.css">
+<link rel="stylesheet" href="../../../../system/inspector.css">
+
+<style>
+  .device { --stage-scene: var(--surface-1); }
+
+  .op { display: flex; flex-direction: column; width: 100%; height: 100%; }
+
+  /* The desktop allowance: denser menus and smaller capsules, earned by
+     pointer precision. A mouse resolves a 28 px target that a gloved thumb
+     cannot, and this is the ONLY per-target exception in the rulebook. */
+  .op__bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-4);
+    border-bottom: var(--stroke-hairline) solid var(--border-default);
+    min-height: var(--hit-min);
+  }
+
+  .op__bar h2 { margin: 0; font-size: var(--text-lg); font-weight: var(--weight-regular); }
+
+  .op__menu { display: flex; gap: var(--space-1); }
+
+  .op__menuitem {
+    min-height: var(--hit-pointer);
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-sm);
+    border: var(--stroke-hairline) solid transparent;
+    background: none;
+    font: inherit;
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+  }
+
+  .op__menuitem[aria-current="true"] {
+    background: var(--text-primary);
+    color: var(--surface-1);
+  }
+
+  .op__body { flex: 1 1 auto; min-height: 0; display: flex; }
+
+  .op__list { flex: 1 1 auto; min-width: 0; overflow-y: auto; padding: var(--space-4); }
+
+  /* A real table, because on a desktop the job is comparing rows, not tapping
+     cards. Row height is the pointer floor, not the touch floor. */
+  .op__table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+
+  .op__table th {
+    text-align: left;
+    font-weight: var(--weight-regular);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: var(--space-2) var(--space-3);
+    border-bottom: var(--stroke-hairline) solid var(--border-default);
+    white-space: nowrap;
+  }
+
+  .op__table td {
+    padding: var(--space-2) var(--space-3);
+    border-bottom: var(--stroke-hairline) solid var(--border-subtle);
+    height: var(--row-pointer);
+  }
+
+  .op__table tbody tr:hover { background: color-mix(in srgb, var(--text-primary) 5%, var(--surface-1)); }
+
+  .op__table tbody tr[aria-selected="true"] { background: var(--text-primary); color: var(--surface-1); }
+  .op__table tbody tr[aria-selected="true"] .vp-badge { border-color: var(--surface-1); }
+
+  .op__num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+  .op__side {
+    flex: 0 0 var(--panel-width-md);
+    border-left: var(--stroke-hairline) solid var(--border-default);
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .op__side h3 { margin: 0; font-size: var(--text-lg); font-weight: var(--weight-regular); }
+  .op__side p { margin: 0; color: var(--text-secondary); font-size: var(--text-sm); }
+  .op__thumb {
+    aspect-ratio: 16 / 9;
+    border: var(--stroke-hairline) dashed var(--border-subtle);
+    border-radius: var(--radius-md);
+    display: grid;
+    place-items: center;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+
+<body>
+<main class="stage">
+
+  <header class="stage__header">
+    <h1 class="stage__title">Operator console — desktop</h1>
+    <p class="stage__meta">Target: Desktop · 1440×900 · State 1 of 3 · Status: review · Updated 2026-09-17</p>
+  </header>
+
+  <section class="stage__notes">
+    <h2>Intent</h2>
+    <p>
+      The first state on the machine that runs the session rather than attends it. Same job as
+      the tablet browser — choose what to open — but the desktop is where you compare many
+      sessions at once and see which devices are in each room.
+    </p>
+    <h2>Why it is built this way</h2>
+    <ul>
+      <li>This is the rulebook's one per-target exception: compact menu capsules at <code>--hit-pointer</code> and <code>--row-pointer</code> table rows, earned by pointer precision. A mouse resolves a target a gloved thumb cannot.</li>
+      <li>A table, not cards. On a desktop the task is scanning down a column, and cards make that harder, not easier.</li>
+      <li>The selected row is filled black, matching selection everywhere else in the language.</li>
+      <li>Numbers are tabular in the numeral face, so device counts and durations align down the column.</li>
+    </ul>
+    <h2>Open questions</h2>
+    <ul>
+      <li>Should the side panel preview a live session's view, or is that a second screen's job?</li>
+      <li>Does an operator ever need to join a room from here, or only host and observe?</li>
+    </ul>
+  </section>
+
+  <div class="device device--desktop" data-device="Desktop · 1440×900">
+    <div class="device__scene"></div>
+    <div class="device__ui">
+
+      <!-- ===== Mockup starts here ===== -->
+      <div class="op">
+
+        <div class="op__bar">
+          <h2>Viewport</h2>
+          <nav class="op__menu" aria-label="Sections">
+            <button class="op__menuitem" type="button" aria-current="true">Sessions</button>
+            <button class="op__menuitem" type="button">Scenes</button>
+            <button class="op__menuitem" type="button">Devices</button>
+            <button class="op__menuitem" type="button">Captures</button>
+            <button class="op__menuitem" type="button">Builds</button>
+          </nav>
+          <span class="u-spacer"></span>
+          <span class="vp-badge vp-badge--positive">4 devices on the network</span>
+          <button class="vp-btn vp-btn--primary" type="button">Host a session</button>
+        </div>
+
+        <div class="op__body">
+
+          <div class="op__list">
+            <table class="op__table">
+              <thead>
+                <tr>
+                  <th scope="col">Session</th>
+                  <th scope="col">State</th>
+                  <th scope="col">In the room</th>
+                  <th scope="col">Running</th>
+                  <th scope="col">Host</th>
+                  <th scope="col">Build</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr aria-selected="true">
+                  <td>Mindy South — pit walk</td>
+                  <td><span class="vp-badge vp-badge--positive">Live</span></td>
+                  <td class="op__num">3</td>
+                  <td class="op__num">14:22</td>
+                  <td>Headset 2</td>
+                  <td class="op__num">1.8.4</td>
+                </tr>
+                <tr>
+                  <td>Nyidi rail corridor</td>
+                  <td><span class="vp-badge">Idle</span></td>
+                  <td class="op__num">0</td>
+                  <td class="op__num">—</td>
+                  <td>—</td>
+                  <td class="op__num">1.8.4</td>
+                </tr>
+                <tr>
+                  <td>The Big Dig — schools build</td>
+                  <td><span class="vp-badge vp-badge--caution">Draft</span></td>
+                  <td class="op__num">0</td>
+                  <td class="op__num">—</td>
+                  <td>—</td>
+                  <td class="op__num">1.8.4</td>
+                </tr>
+                <tr>
+                  <td>East studies — flood sim</td>
+                  <td><span class="vp-badge vp-badge--critical">Build is stale</span></td>
+                  <td class="op__num">0</td>
+                  <td class="op__num">—</td>
+                  <td>—</td>
+                  <td class="op__num">1.7.9</td>
+                </tr>
+                <tr>
+                  <td>Wyloo — east dumps review</td>
+                  <td><span class="vp-badge">Idle</span></td>
+                  <td class="op__num">0</td>
+                  <td class="op__num">—</td>
+                  <td>—</td>
+                  <td class="op__num">1.8.4</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <aside class="op__side">
+            <h3>Mindy South — pit walk</h3>
+            <div class="op__thumb"><svg class="vp-icon vp-icon--lg" aria-hidden="true"><use href="#i-location"></use></svg></div>
+            <p>Running 14 min. Host is Headset&nbsp;2 on the site network; two iPads joined by pairing code.</p>
+
+            <div class="vp-readout">
+              <span class="vp-readout__label">Scene</span>
+              <span class="vp-readout__value">mindy-south · 1.8.4</span>
+            </div>
+            <div class="vp-readout">
+              <span class="vp-readout__label">Frame origin</span>
+              <span class="vp-readout__value">-22.6041, 119.2287</span>
+            </div>
+
+            <span class="u-spacer"></span>
+            <button class="vp-btn vp-btn--secondary vp-btn--block" type="button">Observe the room</button>
+            <button class="vp-btn vp-btn--ghost vp-btn--block" type="button">Copy the pairing code</button>
+          </aside>
+
+        </div>
+      </div>
+      <!-- ===== Mockup ends here ===== -->
+
+    </div>
+  </div>
+
+</main>
+
+<script src="../../../../system/stage.js" defer></script>
+<script src="../../../../system/icons.js"></script>
+<script src="../../../../system/nav.js" defer></script>
+<script src="../../../../system/inspector.js" defer></script>
+</body>
+</html>

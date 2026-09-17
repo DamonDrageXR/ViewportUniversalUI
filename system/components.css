@@ -617,3 +617,210 @@
   z-index: var(--z-toast);
   pointer-events: none;
 }
+
+/* ==========================================================================
+   RULES LAYER
+   --------------------------------------------------------------------------
+   Everything above is the shared vocabulary. What follows are the structural
+   RULES a system may declare in its system.json — the decisions no token can
+   carry, because they are about whether a treatment is allowed at all rather
+   than what value it takes.
+
+   `system/use-tokens.js` puts each rule on <html> as data-rule-<id>, so a rule
+   written once here applies to every system that opts into it. Add a rule to
+   system/schema.json, style it here, and it is available to all of them.
+
+   Keyed on an attribute, so these win over the blocks above without depending
+   on load order, and a system that declares nothing is untouched.
+   ========================================================================== */
+
+/* ---- shadows: none ------------------------------------------------------
+   The tokens are already `none`, which covers every `box-shadow: var(--shadow-*)`
+   above. What tokens cannot reach is the rest of the depth vocabulary: the
+   blur behind a panel, and the press lift. A system that bans elevation bans
+   the whole family, so hierarchy has to come from border, fill, size and
+   spacing instead. The one shadow that survives is a ring, because a focus or
+   required-action ring is line work, not depth. */
+[data-rule-shadows="none"] .vp-panel,
+[data-rule-shadows="none"] .vp-toolbar,
+[data-rule-shadows="none"] .vp-menu,
+[data-rule-shadows="none"] .vp-modal,
+[data-rule-shadows="none"] .vp-toast,
+[data-rule-shadows="none"] .vp-scrim {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* A translucent panel over a 3D scene still needs its own backing; with the
+   blur gone, that has to be an opaque fill rather than a frosted one. */
+[data-rule-shadows="none"] .vp-panel,
+[data-rule-shadows="none"] .vp-toolbar,
+[data-rule-shadows="none"] .vp-menu,
+[data-rule-shadows="none"] .vp-toast {
+  background: var(--surface-1);
+}
+
+[data-rule-shadows="none"] .vp-btn:active:not(:disabled),
+[data-rule-shadows="none"] .vp-tool:active:not(:disabled) {
+  transform: none;
+  background: var(--surface-sunken);
+}
+
+[data-rule-shadows="none"] .vp-segmented__option[aria-pressed="true"] {
+  box-shadow: none;
+}
+
+/* ---- buttonFill: paper --------------------------------------------------
+   No button is ever filled with colour. Size sets hierarchy and the single
+   required action carries a coloured ring, so a screen can only ever have one
+   thing that looks like the thing to press. The ring is a box-shadow because
+   it must not change the button's box — a border that appears on hover would
+   shift every neighbour by the line weight. */
+[data-rule-button-fill="paper"] .vp-btn--primary,
+[data-rule-button-fill="paper"] .vp-btn--danger {
+  background: var(--surface-raised);
+  color: var(--text-primary);
+}
+
+[data-rule-button-fill="paper"] .vp-btn--primary {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 var(--stroke-hairline) var(--accent);
+}
+
+[data-rule-button-fill="paper"] .vp-btn--primary:hover:not(:disabled),
+[data-rule-button-fill="paper"] .vp-btn--primary:active:not(:disabled) {
+  background: var(--surface-sunken);
+}
+
+[data-rule-button-fill="paper"] .vp-btn--danger {
+  border-color: var(--status-critical);
+  box-shadow: 0 0 0 var(--stroke-hairline) var(--status-critical);
+}
+
+/* A disabled action loses the ring. The ring means "this is the one thing to
+   press", so leaving it on something unpressable makes the strongest signal in
+   the language point at a dead end — and there is then no ring left to mark
+   the action that IS available. */
+[data-rule-button-fill="paper"] .vp-btn--primary:disabled,
+[data-rule-button-fill="paper"] .vp-btn--danger:disabled {
+  box-shadow: none;
+  border-color: var(--border-subtle);
+}
+
+/* Secondary and ghost are already unfilled; give them the same edge as the
+   rest of the line work so the set reads as one family. */
+[data-rule-button-fill="paper"] .vp-btn--secondary {
+  border-color: var(--border-strong);
+}
+
+/* ---- disabledPattern: hatch-45 ------------------------------------------
+   Grey plus a 45° hatch. The hatch is what does the work: it reads as
+   unavailable in sunlight, at arm's length, and to a viewer who cannot
+   separate the greys — none of which a dimmed fill can promise. Built with
+   color-mix off the surface token so it stays correct in any palette. */
+[data-rule-disabled-pattern="hatch-45"] .vp-btn:disabled,
+[data-rule-disabled-pattern="hatch-45"] .vp-tool:disabled,
+[data-rule-disabled-pattern="hatch-45"] .vp-menu__item:disabled,
+[data-rule-disabled-pattern="hatch-45"] .vp-input:disabled {
+  background-image: repeating-linear-gradient(
+    45deg,
+    color-mix(in srgb, var(--text-disabled) 14%, transparent) 0 6px,
+    transparent 6px 12px
+  );
+  color: var(--text-disabled);
+  cursor: not-allowed;
+}
+
+/* ---- colourPolicy: rationed ---------------------------------------------
+   Colour means a status, or the one required action. Nothing else. Which
+   leaves selection needing a treatment of its own, and the answer is a black
+   fill — the darkest ink in the system rather than a hue, so "selected" can
+   never be confused with "warning". */
+[data-rule-colour-policy="rationed"] .vp-tool[aria-pressed="true"],
+[data-rule-colour-policy="rationed"] .vp-tree__row[aria-selected="true"] {
+  background: var(--text-primary);
+  color: var(--surface-1);
+  box-shadow: none;
+}
+
+[data-rule-colour-policy="rationed"] .vp-tool[aria-pressed="true"] .vp-icon,
+[data-rule-colour-policy="rationed"] .vp-tree__row[aria-selected="true"] .vp-icon {
+  color: var(--surface-1);
+}
+
+[data-rule-colour-policy="rationed"] .vp-tabs__tab[aria-selected="true"] {
+  border-bottom-color: var(--text-primary);
+}
+
+/* The segmented control's chip gets the same black fill. A white chip on a
+   grey track is perfectly readable and breaks no rule about colour — but it
+   would make "selected" look like two different things in one system, and a
+   rationed language cannot afford a second vocabulary for the same state. */
+[data-rule-colour-policy="rationed"] .vp-segmented__option[aria-pressed="true"] {
+  background: var(--text-primary);
+  color: var(--surface-1);
+}
+
+[data-rule-colour-policy="rationed"] .vp-toggle input:checked + .vp-toggle__track {
+  background: var(--text-primary);
+}
+
+/* A checked menu row is a selection, so it takes the ink, not the accent. The
+   tick already says "on"; colouring it as well spends the accent on something
+   that is not the required action. */
+[data-rule-colour-policy="rationed"] .vp-menu__item[aria-checked="true"] {
+  color: var(--text-primary);
+  font-weight: var(--weight-medium);
+}
+
+/* A badge may still carry a status — that is the sanctioned use of colour —
+   but the accent badge is decoration, so it loses its hue and keeps its
+   shape. */
+[data-rule-colour-policy="rationed"] .vp-badge--accent {
+  background: var(--surface-sunken);
+  color: var(--text-secondary);
+  border: var(--stroke-hairline) solid var(--border-default);
+}
+
+/* ---- controlFeedback: grey-ladder ---------------------------------------
+   Paired with `buttonFill: paper`. Once no control carries a fill, hover and
+   press cannot be "a shade of the fill" — they become steps on the grey
+   ladder, mixed from the ink token so they stay correct if the ink is
+   retuned or the palette inverts. */
+[data-rule-control-feedback="grey-ladder"] .vp-btn:hover:not(:disabled),
+[data-rule-control-feedback="grey-ladder"] .vp-tool:hover:not(:disabled),
+[data-rule-control-feedback="grey-ladder"] .vp-menu__item:hover:not(:disabled),
+[data-rule-control-feedback="grey-ladder"] .vp-tree__row:hover:not([aria-selected="true"]) {
+  background: color-mix(in srgb, var(--text-primary) 7%, var(--surface-1));
+}
+
+[data-rule-control-feedback="grey-ladder"] .vp-btn:active:not(:disabled),
+[data-rule-control-feedback="grey-ladder"] .vp-tool:active:not(:disabled) {
+  background: color-mix(in srgb, var(--text-primary) 15%, var(--surface-1));
+  transform: none;
+}
+
+/* With elevation gone, a thing that claims to be a separate object in space
+   has only one signal left: a heavier line than the structure around it. */
+[data-rule-shadows="none"] .vp-modal,
+[data-rule-shadows="none"] .vp-toast {
+  border: var(--stroke-thin) solid var(--border-strong);
+}
+
+/* ---- numeralFace: mono --------------------------------------------------
+   Anything read as a number opts into the monospace face so figures align
+   down a column. The interface face stays the single UI typeface; this is a
+   property of numerals, not a second font in the system. */
+[data-rule-numeral-face="mono"] .vp-readout,
+[data-rule-numeral-face="mono"] .vp-readout__value,
+[data-rule-numeral-face="mono"] .vp-badge,
+[data-rule-numeral-face="mono"] .vp-note::after {
+  font-family: var(--font-mono);
+  font-weight: var(--weight-medium);
+}
+
+/* ---- dividerStyle: dashed ---------------------------------------------- */
+[data-rule-divider-style="dashed"] .vp-panel__header,
+[data-rule-divider-style="dashed"] .vp-toolbar__divider {
+  border-style: dashed;
+}

@@ -1,0 +1,12 @@
+{
+  "title": "Experience running",
+  "status": "review",
+  "summary": "State 3: the view is sacred. UI collapses to thin strips of 96px or less, placed only in reach zones, and never crosses the middle of a live view.",
+  "created": "2026-09-17",
+  "updated": "2026-09-17",
+  "screens": [
+    { "device": "phone", "file": "phone.html", "title": "One-thumb strip" },
+    { "device": "ipad-landscape", "file": "ipad-landscape.html", "title": "Reach zones" },
+    { "device": "headset", "file": "headset.html", "title": "Wrist menu" }
+  ]
+}

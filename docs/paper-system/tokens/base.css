@@ -1,0 +1,44 @@
+/* Paper System — Base element defaults
+   Applies the foundation: hand-drawn type, ink on paper, the fixed body size.
+   Kept minimal so consumers inherit the look without fighting resets. */
+
+:root {
+  color-scheme: light only;
+}
+
+body {
+  font-family: var(--font-hand);
+  color: var(--color-ink);
+  background: var(--color-paper);
+  font-size: var(--type-body);
+  line-height: var(--leading-body);
+}
+
+/* Meta / numeral text opts into Inter explicitly via this class. */
+.paper-meta {
+  font-family: var(--font-ui-numeral);
+  font-weight: 500;
+}
+
+/* Uppercase label convention used across the system. */
+.paper-uppercase {
+  font-family: var(--font-ui-numeral);
+  font-weight: 700;
+  font-size: var(--type-uppercase);
+  letter-spacing: var(--tracking-upper);
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+
+/* Line-art icon convention: 2px stroke, round caps, no fill, on a 24px grid. */
+.paper-ic {
+  width: 22px;
+  height: 22px;
+  stroke: var(--color-ink);
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.paper-ic--muted { stroke: var(--color-ink-faint); }
+.paper-ic--fill  { fill: var(--color-ink); stroke: none; }

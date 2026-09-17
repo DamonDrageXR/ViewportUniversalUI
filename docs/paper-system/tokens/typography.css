@@ -1,0 +1,33 @@
+/* Paper System — Typography tokens
+   ONE face: Patrick Hand, for all UI text. The scale is FIXED — pick a step,
+   never an in-between size. Inter (--font-ui-numeral) is for chart numerals
+   and tiny meta only, so digits align; it is not a second UI typeface. */
+
+:root {
+  --font-hand:        'Patrick Hand', 'Comic Sans MS', cursive;  /* all UI text */
+  --font-ui-numeral:  'Inter', system-ui, sans-serif;           /* chart/meta numerals only */
+
+  /* Fixed type scale (px) */
+  --type-display-lg:  46px;  /* splash / hero */
+  --type-display:     34px;  /* screen hero */
+  --type-h1:          28px;  /* screen title */
+  --type-h2:          22px;  /* card / section title */
+  --type-h3:          18px;  /* sub-section */
+  --type-body-lg:     18px;  /* lead paragraph */
+  --type-body:        16px;  /* default */
+  --type-caption:     13px;  /* helper / secondary */
+  --type-tiny:        11px;  /* timestamps, counters (floor — do not go smaller) */
+  --type-uppercase-lg:14px;  /* section labels (+2 tracking) */
+  --type-uppercase:   12px;  /* field labels (+2 tracking) */
+
+  --leading-tight:  1.15;
+  --leading-body:   1.34;
+  --leading-loose:  1.5;
+
+  --tracking-upper: 2px;     /* letter-spacing on uppercase labels */
+}
+
+/* Base document defaults — every consuming surface inherits hand + ink on paper */
+:root {
+  --line-default: var(--leading-body);
+}

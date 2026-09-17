@@ -1,0 +1,53 @@
+{
+  "id": "paper-v1",
+  "name": "Paper",
+  "note": "The hand-drawn wireframe language. Reads as a draft, behaves like a working prototype. Greyscale carries all structure; colour is rationed to a status and the one required action.",
+  "created": "2026-09-17",
+  "updated": "2026-09-17",
+  "globals": {
+    "accent": "#2b71dc",
+    "statusPositive": "#4da863",
+    "statusCaution": "#fa9247",
+    "statusCritical": "#e12b56",
+    "neutralHue": 0,
+    "neutralChroma": 0,
+    "radius": 8,
+    "lineWeight": 2,
+    "iconStroke": 1,
+    "spaceUnit": 4,
+    "baseFontSize": 16,
+    "typeScale": 1.22,
+    "fontSans": "hand",
+    "fontMono": "numeral",
+    "density": "comfortable",
+    "panelOpacity": 1
+  },
+  "rules": {
+    "shadows": "none",
+    "buttonFill": "paper",
+    "colourPolicy": "rationed",
+    "disabledPattern": "hatch-45",
+    "themes": "light-only",
+    "controlFeedback": "grey-ladder",
+    "numeralFace": "mono",
+    "dividerStyle": "dashed"
+  },
+  "overrides": {
+    "light": {
+      "--surface-0": "#ffffff",
+      "--surface-1": "#ffffff",
+      "--surface-2": "#ffffff",
+      "--surface-3": "#ffffff",
+      "--surface-raised": "#ffffff",
+      "--surface-sunken": "#eeeeee",
+      "--text-primary": "#1b1b1b",
+      "--text-secondary": "#696969",
+      "--text-muted": "#929292",
+      "--text-disabled": "#929292",
+      "--border-subtle": "#d8d8d8",
+      "--border-default": "#1b1b1b",
+      "--border-strong": "#1b1b1b",
+      "--border-focus": "#929292"
+    }
+  }
+}

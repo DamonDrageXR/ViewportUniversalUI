@@ -24,9 +24,10 @@
   const state = {
     schema: null,
     system: null,
-    draft: null,     // { name, note, globals, overrides }
+    draft: null,     // { name, note, globals, rules, overrides }
     resolved: null,
-    theme: "dark",
+    theme: "dark",   // replaced at boot by the system's own primary theme
+    themes: ["dark", "light"],
     dirty: false,
     previewTarget: "system",
   };
@@ -172,11 +173,39 @@
       </div>`;
   };
 
+  /** Keeps the theme button honest about what it can do. */
+  const syncThemeButton = () => {
+    const btn = document.querySelector('[data-act="theme"]');
+    if (!btn) return;
+    const single = state.themes.length < 2;
+    btn.textContent = single ? `${cap(state.theme)} only` : `Editing: ${state.theme}`;
+    btn.disabled = single;
+    btn.title = single
+      ? `This system is ${state.theme}-only, so there is no other theme to edit.`
+      : "Switch which theme's colours you are editing";
+  };
+
+  const cap = (s) => String(s).charAt(0).toUpperCase() + String(s).slice(1);
+
   /* ---- Rendering --------------------------------------------------------- */
 
   const renderGlobals = () => {
     document.getElementById("globals").innerHTML = state.schema.globals.map((g) =>
       field(g, state.draft.globals[g.id], `data-global="${esc(g.id)}"`)
+    ).join("");
+  };
+
+  /* Rules are the structural decisions a token cannot carry — whether a
+     treatment is allowed at all, rather than what value it takes. They are
+     rendered from schema.rules exactly as the token groups are, so adding a
+     rule to the schema is all it takes to make it editable here. */
+  const renderRules = () => {
+    const host = document.getElementById("rules");
+    if (!host) return;
+    const rules = state.schema.rules ?? [];
+    if (!rules.length) { host.innerHTML = ""; return; }
+    host.innerHTML = rules.map((r) =>
+      field(r, state.draft.rules?.[r.id] ?? r.default, `data-rule="${esc(r.id)}"`)
     ).join("");
   };
 
@@ -226,7 +255,7 @@
          per device — phone, iPad portrait and iPad landscape are the usual three.</p>`;
   };
 
-  const renderAll = () => { renderHeader(); renderGlobals(); renderGroups(); };
+  const renderAll = () => { renderHeader(); renderGlobals(); renderRules(); renderGroups(); };
 
   /* ---- Live preview ------------------------------------------------------
      The preview is the real page in an iframe with the draft's generated CSS
@@ -235,11 +264,23 @@
   const previewSrc = () =>
     `/system/preview.html?system=${systemId}&chrome=0&view=elements`;
 
+  /** The rule attributes the components style against, mirrored onto the
+   *  preview document so a rule change shows without a reload. */
+  const applyRuleAttrs = () => {
+    const doc = document.getElementById("preview")?.contentDocument;
+    if (!doc?.documentElement) return;
+    for (const [key, value] of Object.entries(state.draft.rules ?? {})) {
+      const attr = `data-rule-${key.replace(/[A-Z]/g, (c) => "-" + c.toLowerCase())}`;
+      doc.documentElement.setAttribute(attr, String(value));
+    }
+  };
+
   const inject = (css) => {
     const frame = document.getElementById("preview");
     const doc = frame.contentDocument;
     if (!doc || !doc.head) return;
     doc.documentElement.setAttribute("data-theme", state.theme);
+    applyRuleAttrs();
     let style = doc.getElementById("vp-draft-tokens");
     if (!style) {
       style = doc.createElement("style");
@@ -253,6 +294,7 @@
     try {
       const { resolved, css } = await api("POST", "/preview", {
         globals: state.draft.globals,
+        rules: state.draft.rules,
         overrides: state.draft.overrides,
       });
       state.resolved = resolved;
@@ -275,6 +317,7 @@
         name: state.draft.name,
         note: state.draft.note,
         globals: state.draft.globals,
+        rules: state.draft.rules,
         overrides: state.draft.overrides,
       });
       state.dirty = false;
@@ -298,6 +341,7 @@
     if (!el) return;
     const { kind, unit, token, scope } = el.dataset;
     const globalId = el.dataset.global;
+    const ruleId = el.dataset.rule;
 
     let value;
     if (kind === "color" || kind === "color-text") {
@@ -319,6 +363,17 @@
       });
     } else {
       value = el.value;
+    }
+
+    if (ruleId) {
+      state.draft.rules[ruleId] = el.value;
+      touched();
+      // A rule can change both tokens and the data-rule-* attributes the
+      // components style against, so the preview needs both refreshed.
+      applyRuleAttrs();
+      clearTimeout(previewTimer);
+      previewTimer = setTimeout(() => refreshPreview().then(renderGroups), 180);
+      return;
     }
 
     if (globalId) {
@@ -391,8 +446,13 @@
     if (act.dataset.act === "save-version") return save({ asNewVersion: true });
 
     if (act.dataset.act === "theme") {
-      state.theme = state.theme === "dark" ? "light" : "dark";
-      act.textContent = state.theme === "dark" ? "Editing: dark" : "Editing: light";
+      // Cycles only the themes this system HAS. A light-only system has one,
+      // and offering to edit its dark palette would be offering to edit a
+      // palette that is never emitted.
+      if (state.themes.length < 2) return;
+      const i = state.themes.indexOf(state.theme);
+      state.theme = state.themes[(i + 1) % state.themes.length];
+      syncThemeButton();
       document.documentElement.setAttribute("data-theme", state.theme);
       renderGroups();
       refreshPreview();
@@ -441,8 +501,14 @@
       name: system.name,
       note: system.note ?? "",
       globals: { ...system.globals },
+      rules: { ...(system.resolved?.rules ?? {}) },
       overrides: structuredClone(system.overrides ?? {}),
     };
+
+    state.themes = system.resolved?.themes ?? ["dark", "light"];
+    state.theme = state.themes[0];
+    document.documentElement.setAttribute("data-theme", state.theme);
+    syncThemeButton();
 
     renderMockups();
 

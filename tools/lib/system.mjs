@@ -66,16 +66,29 @@ const nextVersionId = (family, taken) => {
 
 /* ---- Derivation ---------------------------------------------------------- */
 
+/* Four floors, because the input device decides the floor, not the density.
+   `pointer` is the rulebook's one per-target exception: a mouse resolves a
+   28 px target that a gloved thumb cannot, so a desktop may go denser — and
+   only a desktop may. */
 const DENSITY = {
-  compact:     { min: 44, comfortable: 48, xr: 56 },
-  comfortable: { min: 44, comfortable: 56, xr: 64 },
-  field:       { min: 56, comfortable: 64, xr: 72 },
+  compact:     { min: 44, comfortable: 48, xr: 56, pointer: 28 },
+  comfortable: { min: 44, comfortable: 56, xr: 64, pointer: 28 },
+  field:       { min: 56, comfortable: 64, xr: 72, pointer: 32 },
 };
 
 const TYPE_STEPS = { "--text-xs": -1.6, "--text-sm": -0.8, "--text-base": 0, "--text-lg": 1, "--text-xl": 2, "--text-2xl": 3, "--text-3xl": 4 };
 const SPACE_STEPS = { "--space-1": 1, "--space-2": 2, "--space-3": 3, "--space-4": 4, "--space-5": 6, "--space-6": 8, "--space-7": 12, "--space-8": 16 };
 
-const STATUS_BASE = { positive: "#1f9d63", caution: "#d98a10", critical: "#d9453f" };
+const STATUS_FALLBACK = { positive: "#1f9d63", caution: "#d98a10", critical: "#d9453f" };
+
+/** A system's own traffic light. Configurable, because "good / marginal / poor"
+ *  is a palette decision, but the readable text on top of each is never
+ *  hand-picked — it is derived below and contrast-checked like the accent. */
+const statusBase = (g) => ({
+  positive: g.statusPositive || STATUS_FALLBACK.positive,
+  caution:  g.statusCaution  || STATUS_FALLBACK.caution,
+  critical: g.statusCritical || STATUS_FALLBACK.critical,
+});
 
 export const defaultGlobals = (schema) =>
   Object.fromEntries(schema.globals.map((g) => [g.id, g.default]));
@@ -112,7 +125,11 @@ export const deriveShared = (g, schema) => {
   out["--stroke-thin"] = half(w * 1.5);
   out["--stroke-regular"] = half(w * 2);
   out["--stroke-thick"] = half(w * 3);
-  out["--stroke-icon"] = half(w * 1.6);
+  // Separately configurable ratio: a paper language wants its icons exactly as
+  // heavy as a border (1.0), while a hairline UI wants them heavier so they do
+  // not disappear. Either way it is a multiple of the line weight, so the two
+  // can never drift apart.
+  out["--stroke-icon"] = half(w * Number(g.iconStroke ?? 1.6));
 
   const base = Number(g.baseFontSize), ratio = Number(g.typeScale);
   for (const [token, step] of Object.entries(TYPE_STEPS)) {
@@ -134,6 +151,9 @@ export const deriveShared = (g, schema) => {
   out["--hit-min"] = px(d.min);
   out["--hit-comfortable"] = px(d.comfortable);
   out["--hit-xr"] = px(d.xr);
+  out["--hit-pointer"] = px(d.pointer);
+  // A denser row than a control, for a table scanned with a mouse.
+  out["--row-pointer"] = px(d.pointer + 4);
 
   out["--duration-instant"] = "80ms";
   out["--duration-fast"] = "140ms";
@@ -232,13 +252,14 @@ export const deriveTheme = (g, mode) => {
 
   out["--border-focus"] = dark ? a[400] : a[500];
 
-  for (const [name, hex] of Object.entries(STATUS_BASE)) {
+  const status = statusBase(g);
+  for (const [name, hex] of Object.entries(status)) {
     out[`--status-${name}`] = hex;
     // Status TEXT sits on a 20%-tint chip, judged against the same hardest
     // surface as the accent chip above.
     out[`--status-${name}-fg`] = C.fgFor(hex, chipOver(hex, 0.20), 4.6);
   }
-  out["--status-critical-solid"] = C.solidFor(STATUS_BASE.critical, white, 4.5);
+  out["--status-critical-solid"] = C.solidFor(status.critical, white, 4.5);
 
   const sh = dark ? "0 0 0" : "12 16 24";
   const alpha = dark ? [0.30, 0.36, 0.44, 0.52] : [0.08, 0.10, 0.14, 0.18];
@@ -250,15 +271,57 @@ export const deriveTheme = (g, mode) => {
   return out;
 };
 
+/* ---- Rules ---------------------------------------------------------------
+   A system is not only a set of values. "No shadows", "buttons are never
+   filled", "disabled is a hatch" are structural decisions that no token can
+   carry, and they are the difference between a system and a palette.
+
+   A rule reaches the page two ways: the ones that are purely a value fold
+   straight into the token set below, and the rest land as `data-rule-*`
+   attributes on <html> (see system/use-tokens.js), which both the shared
+   components and the audit read. */
+
+export const defaultRules = (schema) =>
+  Object.fromEntries((schema.rules ?? []).map((r) => [r.id, r.default]));
+
+export const resolveRules = (system, schema) => ({
+  ...defaultRules(schema),
+  ...(system.rules ?? {}),
+});
+
+/** Rules that are expressible as tokens, applied before explicit overrides so
+ *  a system can still pin one by hand. */
+const ruleTokens = (rules) => {
+  const out = {};
+  if (rules.shadows === "none") {
+    for (const t of ["--shadow-1", "--shadow-2", "--shadow-3", "--shadow-4"]) out[t] = "none";
+  }
+  return out;
+};
+
+/** Which themes a system actually has. A paper language has one ground. */
+export const themesOf = (rules) =>
+  rules.themes === "light-only" ? ["light"]
+  : rules.themes === "dark-only" ? ["dark"]
+  : ["dark", "light"];
+
 /** The full resolved token set, overrides applied. */
 export const resolve = (system, schema) => {
   const g = { ...defaultGlobals(schema), ...(system.globals ?? {}) };
   const o = system.overrides ?? {};
+  const rules = resolveRules(system, schema);
+  const rt = ruleTokens(rules);
   return {
     globals: g,
-    shared: { ...deriveShared(g, schema), ...(o.shared ?? {}) },
-    dark: { ...deriveTheme(g, "dark"), ...(o.dark ?? {}) },
-    light: { ...deriveTheme(g, "light"), ...(o.light ?? {}) },
+    rules,
+    themes: themesOf(rules),
+    /* Rule tokens are applied to the theme blocks as well as the shared one.
+       The shadows are derived per theme, and a theme block is emitted after
+       the shared block in the same :root — so setting them only in `shared`
+       would leave the theme's own shadows winning and the rule silently off. */
+    shared: { ...deriveShared(g, schema), ...rt, ...(o.shared ?? {}) },
+    dark: { ...deriveTheme(g, "dark"), ...rt, ...(o.dark ?? {}) },
+    light: { ...deriveTheme(g, "light"), ...rt, ...(o.light ?? {}) },
   };
 };
 
@@ -269,25 +332,42 @@ export const toCss = (system, schema) => {
   const r = resolve(system, schema);
   const overrides = system.overrides ?? {};
   const customCount = ["shared", "dark", "light"].reduce((n, k) => n + Object.keys(overrides[k] ?? {}).length, 0);
+  const ruleList = Object.entries(r.rules).map(([k, v]) => `${k}=${v}`).join(" · ");
 
-  return `/* ==========================================================================
+  /* The system's own ground goes in :root, and the other theme — if it has one
+     — behind [data-theme]. A single-theme system emits one block, so asking it
+     for the theme it does not have cannot half-apply a palette. */
+  const primary = r.themes[0];
+  const secondary = r.themes[1];
+  const head = `/* ==========================================================================
    ${system.name} — design tokens
    --------------------------------------------------------------------------
    GENERATED FILE. Edit the system in the studio (\`npm run studio\`) or edit
    systems/${system.id}/system.json; do not edit this file, it is rewritten.
 
    Derived from ${Object.keys(r.globals).length} globals${customCount ? `, with ${customCount} explicit override${customCount === 1 ? "" : "s"}` : ""}.
+   Rules: ${ruleList || "defaults"}.
+   Themes: ${r.themes.join(" + ")}.
    Generated ${new Date().toISOString().slice(0, 10)}.
    ========================================================================== */
 
 :root {
 ${block(r.shared)}
 
-${block(r.dark)}
+${block(r[primary])}
 }
+`;
 
-[data-theme="light"] {
-${block(r.light)}
+  return secondary
+    ? `${head}
+[data-theme="${secondary}"] {
+${block(r[secondary])}
+}
+`
+    : `${head}
+/* ${system.name} is ${r.rules.themes}. There is no second theme to switch to. */
+[data-theme="${primary}"] {
+${block(r[primary])}
 }
 `;
 };
@@ -399,6 +479,7 @@ export const saveSystem = async (id, patch) => {
     ...patch,
     id,
     globals: { ...(current.globals ?? {}), ...(patch.globals ?? {}) },
+    rules: { ...(current.rules ?? {}), ...(patch.rules ?? {}) },
     overrides: patch.overrides ? patch.overrides : current.overrides ?? {},
     updated: new Date().toISOString().slice(0, 10),
   };
@@ -422,11 +503,21 @@ export const createSystem = async ({ name, from }) => {
 
   if (await exists(dir)) throw Object.assign(new Error("System already exists"), { status: 409 });
 
-  let seed = { name: name || "New system", globals: defaultGlobals(schema), overrides: {} };
+  let seed = {
+    name: name || "New system",
+    globals: defaultGlobals(schema),
+    rules: defaultRules(schema),
+    overrides: {},
+  };
   if (from) {
     assertId(from, "source system id");
     const source = await readSystem(from);
-    seed = { name: name || source.name, globals: { ...source.globals }, overrides: structuredClone(source.overrides ?? {}) };
+    seed = {
+      name: name || source.name,
+      globals: { ...source.globals },
+      rules: { ...defaultRules(schema), ...(source.rules ?? {}) },
+      overrides: structuredClone(source.overrides ?? {}),
+    };
   }
 
   const system = {
@@ -436,6 +527,7 @@ export const createSystem = async ({ name, from }) => {
     created: new Date().toISOString().slice(0, 10),
     updated: new Date().toISOString().slice(0, 10),
     globals: seed.globals,
+    rules: seed.rules,
     overrides: seed.overrides,
   };
 

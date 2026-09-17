@@ -192,7 +192,15 @@ const api = async (req, res, url) => {
      implementation of what a global cascades into. */
   if (req.method === "POST" && seg[0] === "preview") {
     const schema = await S.loadSchema();
-    const draft = { id: "preview", name: "Preview", globals: body.globals ?? {}, overrides: body.overrides ?? {} };
+    const draft = {
+      id: "preview",
+      name: "Preview",
+      globals: body.globals ?? {},
+      // Rules travel with the draft: some of them (no shadows) resolve into
+      // token values, so leaving them out would preview the wrong CSS.
+      rules: body.rules ?? {},
+      overrides: body.overrides ?? {},
+    };
     return json(res, 200, { resolved: S.resolve(draft, schema), css: S.toCss(draft, schema) });
   }
 
@@ -209,7 +217,7 @@ const api = async (req, res, url) => {
 
   if (!id) throw Object.assign(new Error("Not found"), { status: 404 });
 
-  // PUT /api/systems/:id  {name?, note?, globals?, overrides?}
+  // PUT /api/systems/:id  {name?, note?, globals?, rules?, overrides?}
   if (req.method === "PUT" && !sub) {
     const saved = await S.saveSystem(id, body);
     await reindex({ regenerateTokens: false });

@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en-AU" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One-thumb strip — Viewport Universal UI</title>
+
+<script src="../../../../systems/manifest.js"></script>
+<script src="../../../../system/use-tokens.js"></script>
+<link rel="stylesheet" href="../../../../system/base.css">
+<link rel="stylesheet" href="../../../../system/components.css">
+<link rel="stylesheet" href="../../../../system/stage.css">
+<link rel="stylesheet" href="../../../../system/nav.css">
+<link rel="stylesheet" href="../../../../system/inspector.css">
+
+<style>
+  /* A phone held one-handed has one reach zone, not two arcs: the bottom
+     third. So the tablet's corner strips collapse into a single bottom strip,
+     and the top of the screen carries status the operator reads but never
+     reaches for. */
+  .an { position: relative; width: 100%; height: 100%; }
+
+  .an__status {
+    position: absolute;
+    top: var(--space-3);
+    left: var(--space-3);
+    right: var(--space-3);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: var(--surface-1);
+    border: var(--stroke-hairline) solid var(--border-default);
+    border-radius: var(--radius-pill);
+  }
+
+  /* One strip, bottom edge, 96 px cap including its padding. */
+  .an__strip {
+    position: absolute;
+    left: var(--space-3);
+    right: var(--space-3);
+    bottom: var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .an__tools {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2);
+    background: var(--surface-1);
+    border: var(--stroke-hairline) solid var(--border-default);
+    border-radius: var(--radius-pill);
+  }
+
+  .an__tools .vp-tool { width: var(--hit-min); height: var(--hit-min); flex: 0 0 auto; border-radius: var(--radius-pill); }
+
+  /* Same long-element rule as the tablet, and it matters more here: one thumb
+     cannot swipe and hold at once, so the arrows are the primary control and
+     the swipe is the shortcut. */
+  .an__scrub {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2);
+    background: var(--surface-1);
+    border: var(--stroke-hairline) solid var(--border-default);
+    border-radius: var(--radius-pill);
+  }
+
+  .an__scrub .vp-tool { width: var(--hit-min); height: var(--hit-min); flex: 0 0 auto; border-radius: var(--radius-pill); }
+
+  .an__track {
+    flex: 1 1 auto;
+    height: var(--stroke-thick);
+    background: var(--surface-sunken);
+    border-radius: var(--radius-pill);
+    position: relative;
+  }
+
+  .an__fill { position: absolute; inset: 0 58% 0 0; background: var(--text-primary); border-radius: var(--radius-pill); }
+
+  .an__reach {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 34%;
+    border-top: var(--stroke-hairline) dashed var(--status-positive);
+    pointer-events: none;
+    display: grid;
+    place-items: start center;
+    padding-top: var(--space-2);
+  }
+
+  .an__note {
+    background: var(--surface-1);
+    border: var(--stroke-hairline) solid var(--border-default);
+    border-radius: var(--radius-sm);
+    padding: 0 var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+  }
+
+  .an__tag {
+    position: absolute;
+    top: 34%;
+    left: 12%;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    background: var(--surface-1);
+    border: var(--stroke-hairline) solid var(--border-default);
+    border-radius: var(--radius-pill);
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-sm);
+  }
+</style>
+</head>
+
+<body>
+<main class="stage">
+
+  <header class="stage__header">
+    <h1 class="stage__title">One-thumb strip — phone</h1>
+    <p class="stage__meta">Target: Phone · 393×852 · State 3 of 3 · Status: review · Updated 2026-09-17</p>
+  </header>
+
+  <section class="stage__notes">
+    <h2>Intent</h2>
+    <p>
+      The running experience on the device someone has in their pocket rather than the one
+      they were issued. A phone held one-handed has a single reach zone — the bottom third —
+      so the tablet's two corner arcs collapse into one strip, and the tool set is cut to
+      what can be driven by one thumb.
+    </p>
+    <h2>Why it is built this way</h2>
+    <ul>
+      <li>One strip at the bottom rather than two in the corners. A phone is not a small tablet: there is no second thumb to put anything under.</li>
+      <li>Status sits at the top, deliberately out of reach. It is read, never pressed, so it costs the view nothing to put it there.</li>
+      <li>The scrubber keeps its arrows at both ends, and here they are the primary control — one thumb cannot swipe and hold at the same time.</li>
+      <li>Fewer tools than the tablet. The answer to a smaller reach zone is fewer controls, not smaller ones.</li>
+    </ul>
+    <h2>Open questions</h2>
+    <ul>
+      <li>Two stacked capsules at the bottom is close to the strip budget. Does the scrubber appear only when a timeline layer is on?</li>
+      <li>Is "leave the room" safe to put in the thumb strip, or does it want a confirm?</li>
+    </ul>
+  </section>
+
+  <div class="device device--phone" data-device="Phone · 393×852">
+    <div class="device__scene"></div>
+    <div class="device__ui">
+
+      <!-- ===== Mockup starts here ===== -->
+      <div class="an">
+
+        <span class="an__tag">
+          <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-marker"></use></svg>Pit crest — RL 412
+        </span>
+
+        <div class="an__reach" aria-hidden="true"><span class="an__note">One-handed thumb reach</span></div>
+
+        <div class="an__status">
+          <svg class="vp-icon vp-icon--sm" aria-hidden="true"><use href="#i-location"></use></svg>
+          <span class="vp-readout__value">±0.08 m</span>
+          <span class="u-spacer"></span>
+          <span class="vp-badge vp-badge--positive">Tracking</span>
+        </div>
+
+        <div class="an__strip">
+
+          <div class="an__scrub" role="group" aria-label="Timeline">
+            <button class="vp-tool" type="button" aria-label="Step back">
+              <svg class="vp-icon" aria-hidden="true"><use href="#i-arrow-left"></use></svg>
+            </button>
+            <div class="an__track"><span class="an__fill"></span></div>
+            <button class="vp-tool" type="button" aria-label="Step forward">
+              <svg class="vp-icon" aria-hidden="true"><use href="#i-arrow-right"></use></svg>
+            </button>
+          </div>
+
+          <div class="an__tools" role="group" aria-label="Tools">
+            <button class="vp-tool" type="button" aria-label="Measure" aria-pressed="true">
+              <svg class="vp-icon" aria-hidden="true"><use href="#i-measure"></use></svg>
+            </button>
+            <button class="vp-tool" type="button" aria-label="Place a marker">
+              <svg class="vp-icon" aria-hidden="true"><use href="#i-marker"></use></svg>
+            </button>
+            <button class="vp-tool" type="button" aria-label="Capture">
+              <svg class="vp-icon" aria-hidden="true"><use href="#i-camera"></use></svg>
+            </button>
+            <span class="u-spacer"></span>
+            <button class="vp-tool" type="button" aria-label="Leave the room">
+              <svg class="vp-icon" aria-hidden="true"><use href="#i-close"></use></svg>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+      <!-- ===== Mockup ends here ===== -->
+
+    </div>
+  </div>
+
+</main>
+
+<script src="../../../../system/stage.js" defer></script>
+<script src="../../../../system/icons.js"></script>
+<script src="../../../../system/nav.js" defer></script>
+<script src="../../../../system/inspector.js" defer></script>
+</body>
+</html>

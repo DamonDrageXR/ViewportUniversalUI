@@ -25,7 +25,7 @@
  * exactly why convention 3 requires the backing in the first place.
  */
 
-import { readdir, access } from "node:fs/promises";
+import { readdir, access, readFile } from "node:fs/promises";
 import { constants } from "node:fs";
 import path from "node:path";
 import { pathToFileURL, fileURLToPath } from "node:url";
@@ -172,10 +172,23 @@ const pagesToAudit = async (filter) => {
     for (const sys of await readdir(systems, { withFileTypes: true })) {
       if (!sys.isDirectory() || sys.name.startsWith("_") || sys.name.startsWith(".")) continue;
 
+      // Which themes this system HAS. Auditing a light-only system in dark
+      // tests a palette it never emits: half the tokens are undefined, so the
+      // run either fails on nothing real or passes on nothing real.
+      let themes = ["dark", "light"];
+      try {
+        const sysJson = JSON.parse(
+          await readFile(path.join(systems, sys.name, "system.json"), "utf8"));
+        const mode = sysJson.rules?.themes;
+        if (mode === "light-only") themes = ["light"];
+        else if (mode === "dark-only") themes = ["dark"];
+      } catch { /* not a system, or no rules — audit both */ }
+
       pages.push({
         name: `system preview · ${sys.name}`,
         url: path.join(ROOT, "system", "preview.html"),
         query: `?system=${sys.name}`,
+        themes,
       });
 
       // A mockup holds one screen per device, and each is a page in its own
@@ -189,6 +202,7 @@ const pagesToAudit = async (filter) => {
             pages.push({
               name: `${sys.name}/${m.name}/${f.replace(/\.html$/, "")}`,
               url: path.join(mockups, m.name, f),
+              themes,
             });
           }
         }
@@ -215,7 +229,9 @@ const main = async () => {
   for (const target of pages) {
     const issues = [];
 
-    for (const theme of ["dark", "light"]) {
+    const themes = target.themes ?? ["dark", "light"];
+
+    for (const theme of themes) {
       const page = await browser.newPage({ viewport: { width: 1600, height: 1200 } });
       const pageErrors = [];
       page.on("pageerror", (e) => pageErrors.push(e.message));
@@ -257,7 +273,7 @@ const main = async () => {
         }
       }
 
-      if (theme === "dark") {
+      if (theme === themes[0]) {
         const seenT = new Set();
         for (const t of targets) {
           if (t.h >= hitMin && t.w >= hitMin) continue;

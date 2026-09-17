@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en-AU" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Join a room — Viewport Universal UI</title>
+
+<script src="../../../../systems/manifest.js"></script>
+<script src="../../../../system/use-tokens.js"></script>
+<link rel="stylesheet" href="../../../../system/base.css">
+<link rel="stylesheet" href="../../../../system/components.css">
+<link rel="stylesheet" href="../../../../system/stage.css">
+<link rel="stylesheet" href="../../../../system/nav.css">
+<link rel="stylesheet" href="../../../../system/inspector.css">
+
+<style>
+  /* State 1 has no spatial view behind it, so the scene is paper rather than a
+     camera feed. This is the only state where that is true. */
+  .device { --stage-scene: var(--surface-1); }
+
+  .out {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    padding: var(--space-4);
+    gap: var(--space-4);
+  }
+
+  .out__brand { display: flex; align-items: baseline; gap: var(--space-2); }
+  .out__brand h2 { margin: 0; font-size: var(--text-xl); font-weight: var(--weight-regular); }
+
+  /* The pairing code is the whole point of the screen, so it is the largest
+     thing on it. Digits opt into the numeral face: a hand face has no aligned
+     figures, and a code is read one character at a time. */
+  .out__code {
+    border: var(--stroke-hairline) solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .out__digits { display: flex; gap: var(--space-2); }
+
+  .out__digit {
+    flex: 1 1 0;
+    aspect-ratio: 3 / 4;
+    border: var(--stroke-hairline) solid var(--border-default);
+    border-radius: var(--radius-md);
+    display: grid;
+    place-items: center;
+    font-family: var(--font-mono);
+    font-size: var(--text-2xl);
+    font-weight: var(--weight-medium);
+  }
+
+  .out__digit--empty { border-style: dashed; color: var(--text-muted); }
+
+  .out__rooms {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .out__room {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: var(--hit-min);
+    padding: var(--space-3);
+    border: var(--stroke-hairline) solid var(--border-default);
+    border-radius: var(--radius-md);
+    background: var(--surface-raised);
+    text-align: left;
+    width: 100%;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+  }
+
+  .out__room b { font-weight: var(--weight-regular); }
+  .out__room small { display: block; color: var(--text-secondary); font-size: var(--text-sm); }
+
+  .out__spacer { flex: 1 1 auto; }
+
+  /* One-handed: the only two things you press live in the bottom third. */
+  .out__actions { display: flex; flex-direction: column; gap: var(--space-2); }
+</style>
+</head>
+
+<body>
+<main class="stage">
+
+  <header class="stage__header">
+    <h1 class="stage__title">Join a room — phone</h1>
+    <p class="stage__meta">Target: Phone · 393×852 · State 1 of 3 · Status: review · Updated 2026-09-17</p>
+  </header>
+
+  <section class="stage__notes">
+    <h2>Intent</h2>
+    <p>
+      The rulebook's first state. Nothing spatial is running, so there is no view to protect
+      and the UI is allowed the whole screen — the only state where that is true. It is plain
+      paper, because dressing up as a spatial surface before the experience starts misrepresents
+      what the device is doing.
+    </p>
+    <h2>Why it is built this way</h2>
+    <ul>
+      <li>No web sign-in anywhere in the product: you join with a pairing code or pick a room. No password ritual in a hard hat and gloves.</li>
+      <li>The code is the largest element on the screen and set in the numeral face, because a hand face has no aligned figures.</li>
+      <li>Both actions sit in the bottom third, inside one-handed thumb reach on a 6.1&nbsp;inch screen. The room list scrolls above them.</li>
+      <li>One required action, so exactly one button carries the ring. Under the rationed-colour rule nothing else on the screen can compete with it.</li>
+    </ul>
+    <h2>Open questions</h2>
+    <ul>
+      <li>Should a recently joined room be offered above the code entry, or does that invite rejoining a finished session?</li>
+      <li>Six digits is a generous target but a lot of typing. Is four plus a room pick enough on site?</li>
+    </ul>
+  </section>
+
+  <div class="device device--phone" data-device="Phone · 393×852">
+    <div class="device__scene"></div>
+    <div class="device__ui">
+
+      <!-- ===== Mockup starts here ===== -->
+      <div class="out">
+
+        <div class="out__brand">
+          <h2>Viewport</h2>
+          <span class="vp-badge">Not connected</span>
+        </div>
+
+        <div class="out__code">
+          <span class="vp-field__label" id="pair-label">Pairing code</span>
+          <div class="out__digits" role="group" aria-labelledby="pair-label">
+            <span class="out__digit">4</span>
+            <span class="out__digit">8</span>
+            <span class="out__digit">2</span>
+            <span class="out__digit out__digit--empty" aria-label="empty">·</span>
+            <span class="out__digit out__digit--empty" aria-label="empty">·</span>
+            <span class="out__digit out__digit--empty" aria-label="empty">·</span>
+          </div>
+          <p class="vp-field__hint">Read the code off the headset or the site tablet.</p>
+        </div>
+
+        <div class="out__rooms" role="group" aria-label="Rooms on this network">
+          <button class="out__room" type="button">
+            <svg class="vp-icon" aria-hidden="true"><use href="#i-location"></use></svg>
+            <span><b>Mindy South — pit walk</b><small>3 in the room · started 14 min ago</small></span>
+            <span class="u-spacer"></span>
+            <span class="vp-badge vp-badge--positive">Live</span>
+          </button>
+          <button class="out__room" type="button">
+            <svg class="vp-icon" aria-hidden="true"><use href="#i-layers"></use></svg>
+            <span><b>Nyidi rail corridor</b><small>Nobody in the room · review copy</small></span>
+          </button>
+          <button class="out__room" type="button">
+            <svg class="vp-icon" aria-hidden="true"><use href="#i-folder"></use></svg>
+            <span><b>The Big Dig — schools build</b><small>Nobody in the room · draft</small></span>
+          </button>
+        </div>
+
+        <div class="out__spacer"></div>
+
+        <div class="out__actions">
+          <button class="vp-btn vp-btn--primary vp-btn--lg vp-btn--block" type="button">Join the room</button>
+          <button class="vp-btn vp-btn--ghost vp-btn--block" type="button">Scan a code instead</button>
+        </div>
+
+      </div>
+      <!-- ===== Mockup ends here ===== -->
+
+    </div>
+  </div>
+
+</main>
+
+<script src="../../../../system/stage.js" defer></script>
+<script src="../../../../system/icons.js"></script>
+<script src="../../../../system/nav.js" defer></script>
+<script src="../../../../system/inspector.js" defer></script>
+</body>
+</html>

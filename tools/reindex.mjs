@@ -14,10 +14,13 @@
  * run this by hand after editing files directly or pulling someone else's work.
  */
 
-import { writeFile } from "node:fs/promises";
+import { writeFile, access } from "node:fs/promises";
+import { constants } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { listSystems, writeTokens, resolve, loadSchema, SYSTEMS_DIR } from "./lib/system.mjs";
+
+const exists = async (p) => { try { await access(p, constants.F_OK); return true; } catch { return false; } };
 
 const HEADER = `/* ==========================================================================
    GENERATED FILE — run \`node tools/reindex.mjs\` to rebuild.
@@ -42,24 +45,34 @@ export const reindex = async ({ regenerateTokens = true } = {}) => {
 
   const schema = await loadSchema();
 
-  const payload = systems.map((s) => {
+  const payload = [];
+  for (const s of systems) {
+    const r = resolve(s, schema);
     // The tile shows a system's palette at a glance, so the manifest carries
     // the resolved swatches rather than making every viewer re-derive them.
-    const tokens = resolve(s, schema).dark;
-    return {
-    id: s.id,
-    family: s.family,
-    version: s.version,
-    name: s.name,
-    note: s.note ?? "",
-    updated: s.updated ?? "",
-    isLatest: latest.some((l) => l.id === s.id),
-    accent: tokens["--accent"],
-    lineWeight: s.globals?.lineWeight ?? 1,
-    surfaces: [tokens["--surface-0"], tokens["--surface-1"], tokens["--surface-2"], tokens["--surface-raised"]],
-    mockups: s.mockups,
-    };
-  });
+    // Read from the system's OWN primary theme — showing dark swatches for a
+    // light-only system would advertise a palette it does not have.
+    const tokens = r[r.themes[0]];
+    payload.push({
+      id: s.id,
+      family: s.family,
+      version: s.version,
+      name: s.name,
+      note: s.note ?? "",
+      updated: s.updated ?? "",
+      isLatest: latest.some((l) => l.id === s.id),
+      accent: tokens["--accent"],
+      lineWeight: s.globals?.lineWeight ?? 1,
+      iconStroke: s.globals?.iconStroke ?? 1.6,
+      themes: r.themes,
+      rules: r.rules,
+      // A system may ship its own structural layer on top of the shared
+      // components; the page loader needs to know whether to fetch it.
+      hasComponents: await exists(path.join(SYSTEMS_DIR, s.id, "components.css")),
+      surfaces: [tokens["--surface-0"], tokens["--surface-1"], tokens["--surface-2"], tokens["--surface-raised"]],
+      mockups: s.mockups,
+    });
+  }
 
   const def = latest[0]?.id ?? systems[0]?.id ?? "";
 
