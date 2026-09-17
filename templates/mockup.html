@@ -5,12 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TITLE — Viewport Universal UI</title>
 
-<!-- Path is ../../ because mockups live at mockups/<slug>/index.html -->
-<link rel="stylesheet" href="../../system/tokens.css">
-<link rel="stylesheet" href="../../system/base.css">
-<link rel="stylesheet" href="../../system/components.css">
-<link rel="stylesheet" href="../../system/stage.css">
-<link rel="stylesheet" href="../../system/nav.css">
+<!-- Four levels up: mockups live at systems/<system>/mockups/<mockup>/index.html.
+     tokens.css is not linked directly — use-tokens.js resolves which
+     system this mockup renders with, so ?system=<id> can retarget it. -->
+<script src="../../../../systems/manifest.js"></script>
+<script src="../../../../system/use-tokens.js"></script>
+<link rel="stylesheet" href="../../../../system/base.css">
+<link rel="stylesheet" href="../../../../system/components.css">
+<link rel="stylesheet" href="../../../../system/stage.css">
+<link rel="stylesheet" href="../../../../system/nav.css">
+<link rel="stylesheet" href="../../../../system/inspector.css">
 
 <style>
   /* Layout specific to THIS mockup only.
@@ -51,7 +55,8 @@
 
 </main>
 
-<script src="../../system/stage.js" defer></script>
-<script src="../../system/nav.js" defer></script>
+<script src="../../../../system/stage.js" defer></script>
+<script src="../../../../system/nav.js" defer></script>
+<script src="../../../../system/inspector.js" defer></script>
 </body>
 </html>

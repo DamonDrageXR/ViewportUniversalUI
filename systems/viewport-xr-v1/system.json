@@ -1,0 +1,21 @@
+{
+  "id": "viewport-xr-v1",
+  "name": "Viewport XR",
+  "note": "",
+  "created": "2026-09-17",
+  "updated": "2026-09-17",
+  "globals": {
+    "accent": "#1e88ff",
+    "neutralHue": 220,
+    "neutralChroma": 18,
+    "radius": 8,
+    "spaceUnit": 4,
+    "baseFontSize": 15,
+    "typeScale": 1.22,
+    "fontSans": "system",
+    "fontMono": "system-mono",
+    "density": "comfortable",
+    "panelOpacity": 0.72
+  },
+  "overrides": {}
+}

@@ -67,6 +67,7 @@
 
 .vp-nav__count {
   font-size: var(--text-xs);
+  white-space: nowrap;
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   color: var(--text-muted);

@@ -154,6 +154,14 @@
   outline-offset: -1px;
 }
 
+/* ?chrome=0 — the page reduced to the artefact itself, for thumbnails and the
+   studio's live preview. The notes and the review bar are for a human reading
+   the page, not for a 150px tile. */
+.stage.is-bare { padding: var(--space-4); gap: 0; justify-content: center; }
+.stage.is-bare .stage__header,
+.stage.is-bare .stage__notes,
+.stage.is-bare .stage__bar { display: none; }
+
 .stage__bar {
   width: min(var(--content-max), 100%);
   display: flex;

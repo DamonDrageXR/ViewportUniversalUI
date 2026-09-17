@@ -15,18 +15,26 @@ the files were not in Drive either.
 
 ## What changes once they are in
 
-`system/tokens.css` currently carries a **placeholder palette** — a dark-first
-XR tool theme, marked as placeholder at the top of the file. It is structured
-so that the real values drop into that one file and re-theme every mockup in
-the repo at once:
+The `Viewport XR v1` system carries a **placeholder palette**. Applying the
+real one is a change to that system's globals, not a rewrite of any CSS:
 
-- Brand colours replace the `--ramp-*` values.
-- The real typeface replaces `--font-sans`.
-- Spacing, radius and type scales replace those sections if the Paper System
-  specifies its own.
+- The brand accent goes in **Accent colour**; the accent ramp and the
+  contrast-safe fill are derived from it.
+- The neutral cast goes in **Neutral hue** and **Neutral saturation**.
+- Corner radius, spacing unit, base text size and type scale each have a
+  global.
+- The typeface goes in **Interface font**. Only system stacks are offered, so
+  a mockup renders identically offline with no font to fetch or licence — if
+  the Paper System names a licensed face, add it to `fonts` in
+  `system/schema.json` with a sensible fallback stack.
 
-Nothing else needs to change, because no mockup contains a raw value.
+Anything the Paper System specifies that does not fall out of a global goes in
+as an explicit token override, which the studio marks as **custom**.
 
-After swapping them in, run `node tools/audit.mjs` — a new palette is the most
-likely way to introduce a contrast failure, and the audit will catch it before
-anyone sees it.
+**Do it as a new version.** Open the system, make the changes, and
+**Save as new version** — that keeps the placeholder as v1 so the two can be
+compared rather than one replacing the other.
+
+Then run `npm run audit`. A new palette is the most likely way to introduce a
+contrast failure. The derived roles protect the accent and status colours
+automatically, but anything pinned as an override is on you.

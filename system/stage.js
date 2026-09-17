@@ -78,6 +78,14 @@
     const stage = document.querySelector(".stage");
     if (!stage) return;
 
+    // Embedded as a thumbnail or a live preview: show the device, nothing else.
+    if (new URLSearchParams(location.search).get("chrome") === "0") {
+      stage.classList.add("is-bare");
+      fitFrames(true);
+      window.addEventListener("resize", () => fitFrames(true));
+      return;
+    }
+
     const bar = document.createElement("div");
     bar.className = "stage__bar";
 

@@ -156,23 +156,40 @@ const collect = (textSel, interactiveSel) => {
 
 /* ---- Runner -------------------------------------------------------------- */
 const pagesToAudit = async (filter) => {
-  // Every page a reviewer can reach, not just the mockups — the gallery and
+  // Every page a reviewer can reach, not just the mockups — the overview and
   // the docs page carry real interactive UI too.
   const pages = [
     { name: "index.html", url: path.join(ROOT, "index.html") },
-    { name: "system/preview.html", url: path.join(ROOT, "system", "preview.html") },
     { name: "docs/how-to-use.html", url: path.join(ROOT, "docs", "how-to-use.html") },
   ];
-  const dir = path.join(ROOT, "mockups");
+
+  // A mockup renders with its own system's tokens, and the style guide has to
+  // be checked once per system — a palette that passes in one can fail in
+  // another, which is the whole reason the audit exists.
+  const systems = path.join(ROOT, "systems");
   try {
-    await access(dir, constants.R_OK);
-    for (const e of await readdir(dir, { withFileTypes: true })) {
-      if (!e.isDirectory()) continue;
-      const file = path.join(dir, e.name, "index.html");
-      try { await access(file, constants.R_OK); } catch { continue; }
-      pages.push({ name: `mockups/${e.name}`, url: file });
+    await access(systems, constants.R_OK);
+    for (const sys of await readdir(systems, { withFileTypes: true })) {
+      if (!sys.isDirectory() || sys.name.startsWith("_") || sys.name.startsWith(".")) continue;
+
+      pages.push({
+        name: `system preview · ${sys.name}`,
+        url: path.join(ROOT, "system", "preview.html"),
+        query: `?system=${sys.name}`,
+      });
+
+      const mockups = path.join(systems, sys.name, "mockups");
+      try {
+        for (const m of await readdir(mockups, { withFileTypes: true })) {
+          if (!m.isDirectory()) continue;
+          const file = path.join(mockups, m.name, "index.html");
+          try { await access(file, constants.R_OK); } catch { continue; }
+          pages.push({ name: `${sys.name}/${m.name}`, url: file });
+        }
+      } catch { /* a system with no mockups yet */ }
     }
-  } catch { /* no mockups yet */ }
+  } catch { /* no systems yet */ }
+
   return filter ? pages.filter((p) => p.name.includes(filter)) : pages;
 };
 
@@ -198,7 +215,7 @@ const main = async () => {
       page.on("pageerror", (e) => pageErrors.push(e.message));
       page.on("console", (m) => { if (m.type() === "error") pageErrors.push(m.text()); });
 
-      await page.goto(pathToFileURL(target.url).href, { waitUntil: "load" });
+      await page.goto(pathToFileURL(target.url).href + (target.query ?? ""), { waitUntil: "load" });
       await page.evaluate((t) => document.documentElement.setAttribute("data-theme", t), theme);
       await page.waitForTimeout(250);
 

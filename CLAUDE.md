@@ -1,105 +1,121 @@
 # Viewport Universal UI
 
-Design system and mockup workshop for Viewport XR — the UI that ships on iPad
-AR in the field, desktop review tools, and headset builds.
+Design systems and mockups for Viewport XR — the UI that ships on iPad AR in
+the field, desktop review tools, and headset builds.
 
-## What this repo is
-
-Self-contained HTML mockups built from a shared token and component layer.
-No framework, no bundler, no build step. A mockup is one folder with one
-`index.html` that opens by double-clicking it.
+## Shape of the repo
 
 ```
-system/       tokens.css · base.css · components.css · stage.css · stage.js
-              nav.css · nav.js · preview.html
-templates/    mockup.html — the starting point for a new mockup
-mockups/      <nnn>-<slug>/index.html — one folder per mockup
-gallery/      manifest.js — the index the root gallery reads
-docs/         conventions.md · workflow.md · paper-system/
-tools/        new-mockup.mjs · reindex.mjs · audit.mjs
-index.html    the gallery
+system/       the engine, shared by every system:
+              base.css · components.css · stage.css/js · nav.css/js
+              tiles.css/js · inspector.css/js · use-tokens.js
+              schema.json — what a system contains and how it may be edited
+              preview.html — the living style guide (?system=<id>)
+systems/      one folder per system VERSION:
+              <family>-v<n>/system.json   globals + explicit overrides
+              <family>-v<n>/tokens.css    GENERATED — never hand-edit
+              <family>-v<n>/mockups/<family>-v<n>/{index.html, mockup.json}
+              manifest.js — GENERATED index
+studio/       the editing app (needs the server): index.html · system.html
+templates/    mockup.html
+tools/        studio.mjs · new-mockup.mjs · reindex.mjs · audit.mjs
+              lib/system.mjs (derivation + file ops) · lib/color.mjs
+index.html    read-only overview; works from file://
 ```
 
-## Before changing anything
+## Systems are data, not CSS
 
-Read `docs/conventions.md`. It is eight rules, each with the reason it exists.
-The ones that get broken most:
+`systems/<id>/tokens.css` is **generated**. Edit `system.json` or use the
+studio; never edit the CSS, it is overwritten on the next reindex.
 
-- **No raw values.** Every colour, space, radius, duration and font size comes
-  from a token in `system/tokens.css`. If the value is missing, add a token.
-  The palette is a placeholder that will be replaced wholesale — an inlined hex
-  is a place that will silently keep the old colour.
-- **Nothing interactive below `--hit-min` (44px).** Use `--hit-xr` (64px) for
-  anything a hand or controller ray has to catch, or anything used in the field.
-- **State is an ARIA attribute**, not a class: `aria-pressed`, `aria-selected`,
-  `aria-expanded`.
-- **Anything floating over the 3D scene needs its own backing.** Scene
-  brightness is not controlled; a bare badge over pale ground disappears.
+A system has:
+- **globals** — ~11 values (accent, neutral hue, radius, spacing unit, base
+  text size, type scale, fonts, density, panel opacity).
+- **overrides** — explicit per-token pins, in three scopes: `shared`, `dark`,
+  `light`. An override wins over the derived value and is shown as "custom"
+  in the studio.
 
-## Accent tokens have three roles
+Everything else is derived by `tools/lib/system.mjs`. Change one global and the
+whole system moves with it.
 
-This trips people up, so it is worth stating plainly:
+### Derived contrast is a guarantee, not a suggestion
 
-| Token | Use |
-| --- | --- |
-| `--accent` | Bright mark: outlines, selection, focus rings, accent text on a dark surface. |
-| `--accent-solid` | Darker fill that carries **white text** — buttons, filled chips. |
-| `--accent-fg` | Accent-coloured **text** on a tinted chip. |
+`--accent-solid` / `--accent-fg` / `--status-*-fg` are computed by walking
+lightness until they clear 4.5:1 against the surface they actually sit on.
+A sweep of 432 accent/theme combinations across the hue circle stays above AA.
 
-Using `--accent` as a button fill is how a primary button ends up at 3.5:1.
-The same split exists for status colours: `--status-critical`,
-`--status-critical-solid`, `--status-critical-fg`.
+If you add a colour role, derive it the same way — do not hand-pick a hex and
+hope. `C.solidFor(hex, against, target)` and `C.fgFor(hex, against, target)`
+in `tools/lib/color.mjs` are there for this.
+
+## Versions are explicit and never overwrite
+
+Ids are `<family>-v<n>` for both systems and mockups. "New version" copies
+forward and leaves the source untouched. Nothing but an explicit delete ever
+removes a version. Keep it that way — the whole point is being able to see
+iterations side by side.
+
+## Adding an editable token
+
+Add it to `system/schema.json` under the right group and it appears in the
+studio with the right control. **No studio code changes.** A group's `control`
+is what constrains the UI, which is why a colour group can only ever offer
+colour controls and a font group only font pickers.
+
+If it also needs deriving from a global, add that to `deriveShared` or
+`deriveTheme` in `tools/lib/system.mjs`.
 
 ## Commands
 
 ```bash
-node tools/new-mockup.mjs "Title" --device ipad-landscape   # scaffold a mockup
-node tools/reindex.mjs                                      # rebuild the gallery index
-node tools/audit.mjs                                        # contrast + hit-target audit
-npm run serve                                               # optional local server
+npm run studio    # http://localhost:4173/studio/ — create, edit, version, delete
+npm run audit     # contrast (both themes, every system) + hit targets
+npm run index     # rebuild manifest.js and regenerate every tokens.css
+node tools/new-mockup.mjs "Title" --system <id> --device <device>
 ```
 
-Device frames: `ipad-landscape`, `ipad-portrait`, `desktop`, `desktop-wide`,
+Devices: `ipad-landscape`, `ipad-portrait`, `desktop`, `desktop-wide`,
 `headset`, `phone`.
+
+## Before changing anything
+
+Read `docs/conventions.md`. The ones broken most:
+
+- **No raw values in a mockup.** Every colour, space, radius and font size
+  comes from a token. An inlined hex is a value that will not move when the
+  system does — which defeats the entire structure above.
+- **Nothing interactive below `--hit-min`.** `--hit-xr` for ray or field use.
+- **State is an ARIA attribute**, not a class: `aria-pressed`, `aria-selected`,
+  `aria-expanded`.
+- **Anything floating over the 3D scene needs its own backing.**
 
 ## Always run the audit
 
-`node tools/audit.mjs` before calling a mockup done. It renders every page in
-both themes, composites translucent panel fills down the ancestor stack, and
-checks text contrast against WCAG AA and every interactive element against
-`--hit-min`. It exits non-zero on failure.
+`npm run audit` renders every page, in both themes, once per system, with
+translucent fills composited down the ancestor stack. It exits non-zero on
+failure.
 
-Do not "fix" a finding by exempting it from the audit. If a finding is a genuine
-false positive, fix the *check* and say so.
+Do not "fix" a finding by exempting it. If a finding is a genuine false
+positive, fix the *check* and say so in the commit.
 
-## Review navigation
+## Page wiring
 
-Every page except the gallery carries a sticky bar with a back link and a
-prev/next pager (`system/nav.css` + `system/nav.js`, two lines in the page
-head and body). `templates/mockup.html` already wires it, so a scaffolded
-mockup gets it for free — do not add it by hand.
+A page that renders with system tokens loads, in `<head>`, **synchronously**:
 
-The pager order is built from `gallery/manifest.js`, so run
-`node tools/reindex.mjs` after adding a mockup or it will not appear in the run.
+```html
+<script src="<up>systems/manifest.js"></script>
+<script src="<up>system/use-tokens.js"></script>
+```
 
-## Adding a component
+`use-tokens.js` resolves which system to use: `?system=<id>`, else the system
+the page lives inside, else the manifest default. Never link a `tokens.css`
+directly — that hard-wires a mockup to one system and breaks comparison.
 
-1. Add it to `system/components.css`, prefixed `vp-`, reading tokens only.
-2. Add a live specimen to `system/preview.html` **in the same change**. A
-   component with no specimen is invisible and gets re-invented.
-3. Run the audit.
-
-## The Paper System
-
-`docs/paper-system/` is the slot for the Paper System — Viewport XR source
-documents. It is empty until someone copies them in. `system/tokens.css` says
-at the top that its palette is a placeholder; when the real values land, they
-replace the `--ramp-*` values and `--font-sans` in that one file and everything
-re-themes. Re-run the audit afterwards — a new palette is the most likely way
-to introduce a contrast failure.
+`?chrome=0` suppresses the nav bar and inspector, for embedding a page in a
+preview frame.
 
 ## Git
 
-Work on the branch you were given. Commit mockup HTML and any token or
-component change together, so a reviewer can see the system change and the
-thing that motivated it in one diff.
+Work on the branch you were given. Commit the generated `tokens.css` and
+`manifest.js` alongside their sources — they are build output, but keeping
+them in the tree is what lets the repo be browsed without running anything.

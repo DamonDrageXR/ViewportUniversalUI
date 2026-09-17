@@ -1,105 +1,82 @@
 #!/usr/bin/env node
 /**
- * Rebuild gallery/manifest.js from the mockups on disk.
+ * Rebuild systems/manifest.js from what is on disk, and regenerate every
+ * system's tokens.css from its system.json.
  *
  *   node tools/reindex.mjs
  *
- * Each mockup's metadata is read out of its own HTML — the <title> and the
- * `.stage__meta` line — so the file stays the single source of truth and the
- * manifest can always be thrown away and regenerated. Hand-written `summary`
- * text in the existing manifest is preserved, because it is the one field the
- * HTML does not carry.
+ * The manifest is a plain .js file rather than .json on purpose: a <script>
+ * tag loads over file://, whereas fetch("manifest.json") is blocked by the
+ * browser's file-origin rules. That keeps "double-click index.html" a working
+ * workflow with no server and no build step.
+ *
+ * The studio writes the manifest itself on every change, so you only need to
+ * run this by hand after editing files directly or pulling someone else's work.
  */
 
-import { readFile, writeFile, readdir } from "node:fs/promises";
-import { existsSync } from "node:fs";
+import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const MANIFEST = path.join(ROOT, "gallery", "manifest.js");
+import { listSystems, writeTokens, resolve, loadSchema, SYSTEMS_DIR } from "./lib/system.mjs";
 
 const HEADER = `/* ==========================================================================
-   Mockup manifest — the index the gallery reads.
-   --------------------------------------------------------------------------
-   A plain .js file rather than .json on purpose: a <script> tag loads over
-   file://, whereas fetch("manifest.json") is blocked by the browser's
-   file-origin rules. That keeps "double-click index.html" a working workflow
-   with no server and no build step.
+   GENERATED FILE — run \`node tools/reindex.mjs\` to rebuild.
 
-   Regenerate with \`node tools/reindex.mjs\`, or just edit it by hand — it is
-   only ever read by the gallery.
+   A plain .js rather than .json so a <script> tag loads it over file://,
+   where fetch() of a local JSON file is blocked.
    ========================================================================== */
 
-window.VP_MOCKUPS = `;
+`;
 
-/** Pull the hand-written summaries out of the current manifest so a reindex
- *  does not silently discard them. */
-const existingSummaries = async () => {
-  const summaries = new Map();
-  if (!existsSync(MANIFEST)) return summaries;
-  const source = await readFile(MANIFEST, "utf8");
-  const sandbox = { window: {} };
-  try {
-    // The manifest is a file we generate ourselves; evaluating it is how we
-    // read it back without pulling in a JSON5 parser.
-    new Function("window", source)(sandbox.window);
-  } catch {
-    return summaries;
-  }
-  for (const entry of sandbox.window.VP_MOCKUPS ?? []) {
-    if (entry?.slug && entry.summary) summaries.set(entry.slug, entry.summary);
-  }
-  return summaries;
-};
+export const reindex = async ({ regenerateTokens = true } = {}) => {
+  const systems = await listSystems();
 
-const field = (meta, label) => {
-  const match = meta.match(new RegExp(`${label}:\\s*([^·]+)`, "i"));
-  return match ? match[1].trim() : "";
-};
-
-export const reindex = async () => {
-  const dir = path.join(ROOT, "mockups");
-  if (!existsSync(dir)) return [];
-
-  const summaries = await existingSummaries();
-  const entries = (await readdir(dir, { withFileTypes: true }))
-    .filter((e) => e.isDirectory())
-    .map((e) => e.name)
-    .sort();
-
-  const mockups = [];
-
-  for (const slug of entries) {
-    const file = path.join(dir, slug, "index.html");
-    if (!existsSync(file)) continue;
-    const html = await readFile(file, "utf8");
-
-    const title =
-      html.match(/<title>([^<]*?)(?:\s*—\s*Viewport Universal UI)?<\/title>/i)?.[1]?.trim() || slug;
-    const meta = html.match(/class="stage__meta"[^>]*>([\s\S]*?)<\/p>/i)?.[1]?.replace(/\s+/g, " ").trim() || "";
-    const updated = meta.match(/Updated\s+(\d{4}-\d{2}-\d{2})/i)?.[1] || "";
-
-    mockups.push({
-      slug,
-      title,
-      target: field(meta, "Target"),
-      status: field(meta, "Status") || "draft",
-      updated,
-      summary: summaries.get(slug) || ""
-    });
+  if (regenerateTokens) {
+    for (const s of systems) await writeTokens(s.id, s);
   }
 
-  await writeFile(MANIFEST, `${HEADER}${JSON.stringify(mockups, null, 2)};\n`, "utf8");
-  return mockups;
+  // Newest version of each family first, then the rest — so the default is
+  // the most recently worked-on system rather than an arbitrary one.
+  const latest = systems.filter((s, i, all) =>
+    !all.some((o) => o.family === s.family && o.version > s.version));
+
+  const schema = await loadSchema();
+
+  const payload = systems.map((s) => {
+    // The tile shows a system's palette at a glance, so the manifest carries
+    // the resolved swatches rather than making every viewer re-derive them.
+    const tokens = resolve(s, schema).dark;
+    return {
+    id: s.id,
+    family: s.family,
+    version: s.version,
+    name: s.name,
+    note: s.note ?? "",
+    updated: s.updated ?? "",
+    isLatest: latest.some((l) => l.id === s.id),
+    accent: tokens["--accent"],
+    surfaces: [tokens["--surface-0"], tokens["--surface-1"], tokens["--surface-2"], tokens["--surface-raised"]],
+    mockups: s.mockups,
+    };
+  });
+
+  const def = latest[0]?.id ?? systems[0]?.id ?? "";
+
+  await writeFile(
+    path.join(SYSTEMS_DIR, "manifest.js"),
+    `${HEADER}window.VP_SYSTEMS = ${JSON.stringify(payload, null, 2)};\n\n` +
+    `window.VP_SYSTEM_DEFAULT = ${JSON.stringify(def)};\n`,
+    "utf8"
+  );
+
+  return payload;
 };
 
-// Only run when invoked directly, not when imported by new-mockup.mjs.
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   reindex()
-    .then((m) => console.log(`Indexed ${m.length} mockup${m.length === 1 ? "" : "s"}.`))
-    .catch((err) => {
-      console.error(err);
-      process.exit(1);
-    });
+    .then((s) => {
+      const mockups = s.reduce((n, x) => n + x.mockups.length, 0);
+      console.log(`Indexed ${s.length} system${s.length === 1 ? "" : "s"}, ${mockups} mockup${mockups === 1 ? "" : "s"}.`);
+    })
+    .catch((err) => { console.error(err); process.exit(1); });
 }

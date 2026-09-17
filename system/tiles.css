@@ -1,0 +1,175 @@
+/* ==========================================================================
+   Viewport Universal UI — Tiles
+   --------------------------------------------------------------------------
+   The system and mockup cards, shared by the read-only overview and the
+   studio. The studio adds action buttons; the markup is otherwise identical,
+   so the two views cannot drift apart.
+   ========================================================================== */
+
+.vp-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.vp-tiles__group { display: flex; flex-direction: column; gap: var(--space-3); }
+
+.vp-tiles__grouphead {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.vp-tiles__grouphead h2 { font-size: var(--text-lg); }
+
+/* ---- System tile --------------------------------------------------------- */
+.vp-tile {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.vp-tile--muted { opacity: 0.74; }
+.vp-tile--muted:hover { opacity: 1; }
+
+.vp-tile__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.vp-tile__name {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+}
+
+.vp-tile__sub { font-size: var(--text-xs); color: var(--text-muted); }
+
+/* A system's palette at a glance — the fastest way to tell two versions
+   apart in a grid without opening either. */
+.vp-tile__swatches {
+  display: flex;
+  height: 44px;
+  border-block: 1px solid var(--border-subtle);
+}
+
+.vp-tile__swatch { flex: 1 1 0; }
+.vp-tile__swatch--wide { flex: 2 1 0; }
+
+.vp-tile__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-xs);
+}
+
+.vp-tile__fact { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.vp-tile__factlabel { color: var(--text-muted); letter-spacing: var(--tracking-wide); text-transform: uppercase; }
+.vp-tile__factvalue { color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.vp-tile__body {
+  padding: 0 var(--space-4) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.vp-tile__label {
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.vp-tile__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+  margin-top: auto;
+  flex-wrap: wrap;
+}
+
+/* ---- Mockup tile --------------------------------------------------------- */
+.vp-mockups {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-2);
+}
+
+.vp-mockup {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface-2);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color var(--duration-fast) var(--ease-standard);
+}
+
+.vp-mockup:hover { border-color: var(--border-strong); }
+
+/* The thumbnail is the real mockup in an iframe, scaled down — never a stale
+   screenshot that has to be regenerated and will eventually lie. */
+.vp-mockup__shot {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--surface-sunken);
+}
+
+.vp-mockup__shot iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1366px;
+  height: 1024px;
+  border: 0;
+  transform-origin: top left;
+  pointer-events: none;
+}
+
+.vp-mockup__meta {
+  padding: var(--space-2) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.vp-mockup__title {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vp-mockup__tags { display: flex; gap: var(--space-1); flex-wrap: wrap; }
+
+.vp-mockup__actions {
+  display: flex;
+  gap: var(--space-1);
+  padding: 0 var(--space-2) var(--space-2);
+}
+
+.vp-empty {
+  padding: var(--space-4);
+  border: 1px dashed var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  text-align: center;
+}

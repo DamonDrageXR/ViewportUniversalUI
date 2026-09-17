@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How to use — Viewport Universal UI</title>
-<link rel="stylesheet" href="../system/tokens.css">
+<script src="../systems/manifest.js"></script>
+<script src="../system/use-tokens.js"></script>
 <link rel="stylesheet" href="../system/base.css">
 <link rel="stylesheet" href="../system/components.css">
 <link rel="stylesheet" href="../system/nav.css">
@@ -30,75 +31,134 @@
 
   <header>
     <h1>How to use this repo</h1>
-    <p>Everything here is plain HTML and CSS. There is no build step, no framework and nothing to install to look at a mockup.</p>
+    <p>
+      Design systems and the mockups built with them. Looking is free — open a file and it works.
+      Editing needs the studio server, because that is what writes your changes to disk.
+    </p>
   </header>
 
   <section>
-    <h2>Look at what exists</h2>
+    <h2>Just looking</h2>
     <ul>
-      <li><a href="../index.html">Gallery</a> — every mockup in the repo.</li>
-      <li><a href="../system/preview.html">System preview</a> — the component library itself, rendered.</li>
+      <li><a href="../index.html">Overview</a> — every system and its mockups, read-only.</li>
+      <li><a href="../system/preview.html">Style guide</a> — the component library, rendered.</li>
     </ul>
-    <p>Double-clicking the files works. For a real origin, run <code>npm run serve</code>.</p>
+    <p>Double-clicking the files works. No install, no server.</p>
   </section>
 
   <section>
-    <h2>Make a new mockup</h2>
-    <pre>node tools/new-mockup.mjs "Desktop review — measurement panel" --device desktop</pre>
-    <p>Devices: <code>ipad-landscape</code>, <code>ipad-portrait</code>, <code>desktop</code>, <code>desktop-wide</code>, <code>headset</code>, <code>phone</code>.</p>
+    <h2>Working on it</h2>
+    <pre>npm install     # once
+npm run studio  # http://localhost:4173/studio/</pre>
+    <p>
+      The studio writes real files under <code>systems/</code>. Nothing lives in browser storage,
+      so your work is in git and survives the machine.
+    </p>
   </section>
 
   <section>
-    <h2>The review bar</h2>
-    <p>Every mockup gets these four controls automatically:</p>
+    <h2>Systems and versions</h2>
+    <p>
+      A system is a palette, a type scale, a spacing scale and a set of hit-target floors.
+      Mockups live inside the system they were built with.
+    </p>
+    <p>
+      Both are named <code>&lt;family&gt;-v&lt;n&gt;</code>. <strong>New version</strong> copies forward
+      and leaves the original untouched, so you can put v1 and v4 side by side. Nothing
+      auto-versions, and nothing but <strong>Delete</strong> removes one — and that asks first.
+    </p>
+  </section>
+
+  <section>
+    <h2>Global settings cascade</h2>
+    <p>A system is derived from about eleven values. Change one and everything below moves with it.</p>
     <table>
-      <thead><tr><th>Control</th><th>What it shows</th></tr></thead>
+      <thead><tr><th>Global</th><th>Moves</th></tr></thead>
       <tbody>
-        <tr><td>Light theme</td><td>The same layout in the other theme. Both have to work.</td></tr>
-        <tr><td>8px grid</td><td>Whether spacing is on the scale or just close to it.</td></tr>
-        <tr><td>Hit targets</td><td>Outlines every interactive element.</td></tr>
-        <tr><td>Fit to window</td><td>Scales the frame without changing the layout inside it.</td></tr>
+        <tr><td>Accent colour</td><td>The accent ramp, the contrast-safe fill, focus rings, selection.</td></tr>
+        <tr><td>Neutral hue &amp; saturation</td><td>Every surface, border and text colour.</td></tr>
+        <tr><td>Corner radius</td><td>All four radius steps.</td></tr>
+        <tr><td>Spacing unit</td><td>The whole spacing scale.</td></tr>
+        <tr><td>Base text size &amp; type scale</td><td>All seven type steps.</td></tr>
+        <tr><td>Density</td><td>Every hit-target floor. <strong>Field</strong> pushes them to 56/64/72px.</td></tr>
+        <tr><td>Panel opacity</td><td>How much of the 3D scene shows through a panel.</td></tr>
       </tbody>
     </table>
+    <p>
+      The colours that carry text are <strong>derived, not picked</strong>: the accent fill and accent
+      text are computed by walking lightness until they clear 4.5:1 against the surface they actually
+      sit on. Set the accent to anything — a sweep of 432 accent and theme combinations across the
+      full hue circle stays above AA.
+    </p>
+  </section>
+
+  <section>
+    <h2>Editing by clicking</h2>
+    <p>
+      Open a mockup from the studio and press <strong>Inspect</strong>. Hover highlights; clicking
+      shows which tokens that element actually resolves to, and gives you the right control for each.
+    </p>
+    <table>
+      <thead><tr><th>What you clicked</th><th>What you get</th></tr></thead>
+      <tbody>
+        <tr><td>A colour</td><td>A colour picker and a hex field.</td></tr>
+        <tr><td>A corner radius, size or spacing</td><td>A slider and a number, with sane limits.</td></tr>
+        <tr><td>A font</td><td>A font picker.</td></tr>
+      </tbody>
+    </table>
+    <p>
+      Changes apply live and <strong>Save</strong> writes them to the system as overrides. An
+      overridden token shows as <strong>custom</strong> in the editor with a reset link, so it is
+      never a mystery why a global stopped affecting something.
+    </p>
   </section>
 
   <section>
     <h2>Paging through</h2>
-    <p>
-      Every page except the gallery has a sticky bar at the top: <strong>← Gallery</strong>,
-      and a <strong>Prev / Next</strong> pager through everything in the repo.
-    </p>
+    <p>Every page except the overview has a sticky bar: <strong>← Gallery</strong> and a <strong>Prev / Next</strong> pager through everything.</p>
     <table>
       <thead><tr><th>Key</th><th>Does</th></tr></thead>
       <tbody>
         <tr><td><kbd>←</kbd> <kbd>→</kbd></td><td>Page back and forward.</td></tr>
-        <tr><td><kbd>Esc</kbd></td><td>Back to the gallery.</td></tr>
+        <tr><td><kbd>Esc</kbd></td><td>Back to the overview.</td></tr>
       </tbody>
     </table>
-    <p>Arrow keys are handed back to whatever is focused, so a slider or a text field still behaves normally.</p>
+    <p>Arrow keys are handed back to whatever is focused, so a slider still behaves normally.</p>
+  </section>
+
+  <section>
+    <h2>Comparing across systems</h2>
+    <p>
+      Add <code>?system=&lt;id&gt;</code> to any mockup URL and it renders with that system's tokens
+      instead of its own — the way to check whether a palette change works on a real screen before
+      committing to it.
+    </p>
   </section>
 
   <section>
     <h2>Check it</h2>
-    <pre>node tools/audit.mjs</pre>
+    <pre>npm run audit</pre>
     <p>
-      Checks text contrast in both themes — with translucent panel fills composited properly,
-      which is the part everyone gets wrong — and checks every interactive element against
+      Renders every page in both themes, once per system, composites translucent panel fills down the
+      ancestor stack, and checks contrast against WCAG AA and every interactive element against
       <code>--hit-min</code>. Exits non-zero on failure.
     </p>
   </section>
 
   <section>
     <h2>The rules</h2>
-    <p>Eight of them, each with the reason it exists, in <a href="conventions.md">conventions.md</a>. The short version:</p>
+    <p>Eleven of them, each with the reason it exists, in <a href="conventions.md">conventions.md</a>. The short version:</p>
     <ol>
       <li>No raw colours or pixel values in a mockup — only tokens.</li>
-      <li>Nothing interactive below <code>--hit-min</code> (44px), <code>--hit-xr</code> (64px) for ray or field use.</li>
-      <li>Panels are translucent; anything floating over the scene gets its own backing.</li>
+      <li>Nothing interactive below <code>--hit-min</code>; <code>--hit-xr</code> for ray or field use.</li>
+      <li>Panels are translucent; anything over the scene gets its own backing.</li>
       <li>State is an ARIA attribute, not a class.</li>
       <li>Written twice means it belongs in <code>components.css</code>, with a specimen.</li>
       <li>Every mockup states its intent and its open questions.</li>
       <li>Contrast is measured, not eyeballed.</li>
+      <li>Never hand-edit a generated file.</li>
+      <li>Versions are explicit, and never overwrite.</li>
+      <li>Derive colours that carry text — do not pick them.</li>
       <li>Mockups are self-contained and build-free.</li>
     </ol>
   </section>

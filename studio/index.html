@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Studio — Viewport Universal UI</title>
+
+<script src="../systems/manifest.js"></script>
+<script src="../system/use-tokens.js"></script>
+<link rel="stylesheet" href="../system/base.css">
+<link rel="stylesheet" href="../system/components.css">
+<link rel="stylesheet" href="../system/tiles.css">
+<link rel="stylesheet" href="studio.css">
+</head>
+
+<body>
+<div class="studio">
+
+  <header class="studio__bar">
+    <span class="studio__brand">Viewport UI Studio</span>
+    <button class="vp-btn vp-btn--primary" type="button" data-action="system-new">New system</button>
+    <span class="u-spacer"></span>
+    <a class="vp-btn vp-btn--ghost" href="../index.html">Overview</a>
+    <a class="vp-btn vp-btn--ghost" href="../docs/how-to-use.html">How to use</a>
+  </header>
+
+  <main class="studio__main">
+    <section class="u-stack" id="systems">
+      <p class="vp-empty">Loading…</p>
+    </section>
+  </main>
+
+</div>
+
+<script src="../system/tiles.js"></script>
+<script src="studio.js"></script>
+<script>
+(() => {
+  "use strict";
+  const { api, confirmDelete, toast, fail, ask } = window.Studio;
+  const host = document.getElementById("systems");
+
+  const render = (systems) => {
+    if (!systems.length) {
+      host.innerHTML =
+        '<p class="vp-empty">No systems yet. <strong>New system</strong> above creates one from the defaults.</p>';
+      return;
+    }
+
+    // Versions of the same system group together so a run of iterations reads
+    // as one thing rather than as unrelated systems side by side.
+    const families = new Map();
+    for (const s of systems) {
+      if (!families.has(s.family)) families.set(s.family, []);
+      families.get(s.family).push(s);
+    }
+
+    host.innerHTML = [...families.entries()].map(([family, versions]) => {
+      const sorted = [...versions].sort((a, b) => b.version - a.version);
+      return `
+        <section class="vp-tiles__group">
+          <header class="vp-tiles__grouphead">
+            <h2>${VPTiles.esc(sorted[0].name)}</h2>
+            <span class="vp-badge">${sorted.length} version${sorted.length === 1 ? "" : "s"}</span>
+          </header>
+          <div class="vp-tiles">
+            ${sorted.map((s) => VPTiles.systemTile(s, { base: "../", actions: true })).join("")}
+          </div>
+        </section>`;
+    }).join("");
+  };
+
+  const load = async () => {
+    const { systems } = await api("GET", "/state");
+    render(systems.map((s) => ({
+      ...s,
+      accent: s.resolved.dark["--accent"],
+      surfaces: [
+        s.resolved.dark["--surface-0"], s.resolved.dark["--surface-1"],
+        s.resolved.dark["--surface-2"], s.resolved.dark["--surface-raised"],
+      ],
+      isLatest: !systems.some((o) => o.family === s.family && o.version > s.version),
+    })));
+  };
+
+  const find = (id) => [...host.querySelectorAll("[data-system]")]
+    .find((el) => el.dataset.system === id);
+
+  const nameOf = (id) => find(id)?.querySelector(".vp-tile__name")?.textContent ?? id;
+
+  document.addEventListener("click", async (e) => {
+    const btn = e.target.closest("[data-action]");
+    if (!btn) return;
+    const { action, id, system } = btn.dataset;
+
+    try {
+      if (action === "system-new") {
+        const name = ask("Name for the new system", "New system");
+        if (!name) return;
+        const created = await api("POST", "/systems", { name });
+        toast(`Created ${created.name} (${created.id})`, "vp-badge--positive");
+        await load();
+        return;
+      }
+
+      if (action === "system-version") {
+        const created = await api("POST", `/systems/${id}/version`);
+        toast(`${created.name} v${created.version} created — v${created.version - 1} untouched`, "vp-badge--positive");
+        await load();
+        return;
+      }
+
+      if (action === "system-delete") {
+        const mockups = find(id)?.querySelectorAll(".vp-mockup").length ?? 0;
+        if (!confirmDelete(`system "${nameOf(id)}"`,
+          `${id}${mockups ? ` and its ${mockups} mockup${mockups === 1 ? "" : "s"}` : ""}`)) return;
+        await api("DELETE", `/systems/${id}`);
+        toast(`Deleted ${id}`);
+        await load();
+        return;
+      }
+
+      if (action === "mockup-new") {
+        const title = ask("Title for the new mockup", "New mockup");
+        if (!title) return;
+        const device = ask(
+          "Device: ipad-landscape, ipad-portrait, desktop, desktop-wide, headset, phone",
+          "ipad-landscape");
+        if (!device) return;
+        const created = await api("POST", `/systems/${id}/mockups`, { title, device });
+        toast(`Created ${created.id}`, "vp-badge--positive");
+        await load();
+        return;
+      }
+
+      if (action === "mockup-version") {
+        const created = await api("POST", `/systems/${system}/mockups/${id}/version`);
+        toast(`${created.id} created from ${created.derivedFrom}`, "vp-badge--positive");
+        await load();
+        return;
+      }
+
+      if (action === "mockup-delete") {
+        if (!confirmDelete("mockup", `${id} in ${system}`)) return;
+        await api("DELETE", `/systems/${system}/mockups/${id}`);
+        toast(`Deleted ${id}`);
+        await load();
+        return;
+      }
+    } catch (err) {
+      fail(err);
+    }
+  });
+
+  load().catch((err) => {
+    host.innerHTML =
+      '<p class="vp-empty">Could not reach the studio server. Start it with <code>npm run studio</code>.</p>';
+    console.error(err);
+  });
+})();
+</script>
+</body>
+</html>

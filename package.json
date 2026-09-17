@@ -5,10 +5,10 @@
   "description": "Design system and mockup workshop for Viewport XR",
   "type": "module",
   "scripts": {
+    "studio": "node tools/studio.mjs",
     "new": "node tools/new-mockup.mjs",
     "index": "node tools/reindex.mjs",
-    "audit": "node tools/audit.mjs",
-    "serve": "npx --yes http-server . -p 4173 -c-1 -o"
+    "audit": "node tools/audit.mjs"
   },
   "devDependencies": {
     "playwright": "^1.56.1"

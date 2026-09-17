@@ -23,6 +23,11 @@
     document.currentScript || document.querySelector('script[src*="nav.js"]');
   if (!tag) return;
 
+  // ?chrome=0 suppresses review chrome. The studio's live preview embeds real
+  // pages, and a nav bar inside a 300px preview is noise, not navigation.
+  if (new URLSearchParams(location.search).get("chrome") === "0") return;
+
+
   // nav.js lives in system/, so one level up is the repo root.
   const root = new URL("../", tag.src);
   const at = (relative) => new URL(relative, root).href;
@@ -32,14 +37,25 @@
      both resolve to the same entry. */
   const identity = (href) => new URL(href).pathname.replace(/index\.html$/, "");
 
-  const buildPages = (mockups) => [
-    { href: at("system/preview.html"), title: "System preview" },
-    { href: at("docs/how-to-use.html"), title: "How to use" },
-    ...mockups.map((m) => ({
-      href: at(`mockups/${m.slug}/index.html`),
-      title: m.title || m.slug
-    }))
-  ];
+  /* The run is: the two reference pages, then every mockup of every system,
+     newest system version first. A mockup's label carries its system, because
+     the same mockup family usually exists under more than one. */
+  const buildPages = (systems) => {
+    const ordered = [...systems].sort((a, b) =>
+      a.family === b.family ? b.version - a.version : a.family.localeCompare(b.family));
+
+    const mockups = ordered.flatMap((s) =>
+      (s.mockups ?? []).map((m) => ({
+        href: at(m.href),
+        title: `${m.title} — ${s.name} v${s.version}`
+      })));
+
+    return [
+      { href: at("system/preview.html"), title: "System preview" },
+      { href: at("docs/how-to-use.html"), title: "How to use" },
+      ...mockups
+    ];
+  };
 
   const link = (label, href, ariaLabel) => {
     const a = document.createElement("a");
@@ -55,8 +71,8 @@
     return a;
   };
 
-  const render = (mockups) => {
-    const pages = buildPages(mockups);
+  const render = (systems) => {
+    const pages = buildPages(systems);
     const here = identity(location.href);
     const index = pages.findIndex((p) => identity(p.href) === here);
 
@@ -114,15 +130,17 @@
   };
 
   /* The manifest is a plain script rather than JSON so it loads over file://.
-     If it cannot be read the bar still renders — just without the mockups. */
+     Most pages already load it for use-tokens.js, so this usually finds it
+     in memory. If it cannot be read the bar still renders — just without the
+     mockups. */
   const start = () => {
-    if (Array.isArray(window.VP_MOCKUPS)) {
-      render(window.VP_MOCKUPS);
+    if (Array.isArray(window.VP_SYSTEMS)) {
+      render(window.VP_SYSTEMS);
       return;
     }
     const manifest = document.createElement("script");
-    manifest.src = at("gallery/manifest.js");
-    manifest.onload = () => render(window.VP_MOCKUPS ?? []);
+    manifest.src = at("systems/manifest.js");
+    manifest.onload = () => render(window.VP_SYSTEMS ?? []);
     manifest.onerror = () => render([]);
     document.head.append(manifest);
   };

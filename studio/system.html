@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Edit system — Viewport Universal UI</title>
+
+<script src="../systems/manifest.js"></script>
+<script src="../system/use-tokens.js"></script>
+<link rel="stylesheet" href="../system/base.css">
+<link rel="stylesheet" href="../system/components.css">
+<link rel="stylesheet" href="../system/tiles.css">
+<link rel="stylesheet" href="studio.css">
+</head>
+
+<body>
+<div class="studio">
+
+  <header class="studio__bar">
+    <a class="vp-btn vp-btn--ghost" href="index.html">← Studio</a>
+    <input class="vp-input" id="name" style="width:220px" aria-label="System name">
+    <span class="vp-badge" id="version">—</span>
+    <span class="dirty-dot" id="dirty" hidden title="Unsaved changes"></span>
+    <span class="u-spacer"></span>
+    <button class="vp-btn vp-btn--secondary" type="button" data-act="theme">Editing: dark</button>
+    <button class="vp-btn vp-btn--secondary" type="button" data-act="save">Save</button>
+    <button class="vp-btn vp-btn--primary" type="button" data-act="save-version">Save as new version</button>
+    <button class="vp-btn vp-btn--ghost" type="button" data-act="delete">Delete</button>
+  </header>
+
+  <main class="studio__main">
+    <div class="editor">
+
+      <div class="editor__col">
+
+        <section class="vp-panel vp-panel--solid globals">
+          <header class="vp-panel__header">
+            <h2 class="vp-panel__title">Global settings</h2>
+            <span class="u-spacer"></span>
+            <span class="vp-badge vp-badge--accent">cascades to everything</span>
+          </header>
+          <div class="vp-panel__body">
+            <p class="field__note" style="margin-bottom:var(--space-4)">
+              Every token below is derived from these. Change one and the whole system moves with it —
+              including the contrast-safe accent fill, which is recomputed so a new brand colour cannot
+              quietly drop a button below 4.5:1.
+            </p>
+            <div class="globals__grid" id="globals"></div>
+          </div>
+        </section>
+
+        <div class="u-stack" id="groups"></div>
+
+      </div>
+
+      <div class="editor__col editor__sticky">
+        <section class="vp-panel vp-panel--solid">
+          <header class="vp-panel__header">
+            <h2 class="vp-panel__title">Live preview</h2>
+            <span class="u-spacer"></span>
+            <select class="vp-input" id="target" style="width:170px" aria-label="Preview target"></select>
+          </header>
+          <div class="vp-panel__body vp-panel__body--tight">
+            <div class="preview-frame">
+              <iframe id="preview" title="Live preview"></iframe>
+            </div>
+            <p class="field__note" style="margin-top:var(--space-2)">
+              Showing the draft, not what is saved. <strong>Save</strong> writes to this version;
+              <strong>Save as new version</strong> copies it forward and leaves this one as it is.
+            </p>
+          </div>
+        </section>
+      </div>
+
+    </div>
+  </main>
+
+</div>
+
+<script src="../system/tiles.js"></script>
+<script src="studio.js"></script>
+<script src="editor.js"></script>
+</body>
+</html>

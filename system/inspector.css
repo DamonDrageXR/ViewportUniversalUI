@@ -1,0 +1,120 @@
+/* ==========================================================================
+   Viewport Universal UI — Inspector
+   --------------------------------------------------------------------------
+   Click an element in a mockup to see which tokens it resolves to and edit
+   them in place. Only active when the page is served by the studio, since it
+   needs somewhere to save to.
+
+   Review scaffolding. None of it ships.
+   ========================================================================== */
+
+.vp-inspecting *:not(.vp-insp):not(.vp-insp *) { cursor: crosshair !important; }
+
+.vp-insp-highlight {
+  position: fixed;
+  pointer-events: none;
+  z-index: 2147483000;
+  border: 1px solid var(--accent);
+  background: var(--accent-quiet);
+  border-radius: var(--radius-sm);
+  transition: all 80ms var(--ease-standard);
+}
+
+.vp-insp {
+  position: fixed;
+  top: var(--space-4);
+  right: var(--space-4);
+  width: 320px;
+  max-height: calc(100vh - var(--space-8));
+  z-index: 2147483100;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-4);
+  overflow: hidden;
+}
+
+/* `display: flex` above outranks the browser's own `[hidden] { display: none }`,
+   so without this the hidden panel still sits over the page swallowing clicks. */
+.vp-insp[hidden] { display: none; }
+
+.vp-insp__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.vp-insp__title {
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.vp-insp__target {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--accent-fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vp-insp__body {
+  padding: var(--space-3);
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-height: 0;
+}
+
+.vp-insp__foot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.vp-insp__row { display: flex; flex-direction: column; gap: var(--space-2); }
+
+.vp-insp__prop {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.vp-insp__token {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.vp-insp__controls { display: flex; align-items: center; gap: var(--space-2); }
+
+.vp-insp__swatch {
+  width: var(--hit-min);
+  height: var(--hit-min);
+  flex: 0 0 auto;
+  padding: 2px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  cursor: pointer;
+}
+
+.vp-insp__hex { font-family: var(--font-mono); text-transform: lowercase; }
+
+.vp-insp__num { width: 76px; flex: 0 0 auto; text-align: right; font-variant-numeric: tabular-nums; }
+
+.vp-insp__note {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  line-height: var(--leading-normal);
+}

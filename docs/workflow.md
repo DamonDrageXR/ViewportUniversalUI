@@ -2,80 +2,108 @@
 
 ## Look at what exists
 
-Open `index.html` in a browser — that is the gallery of every mockup. Open
-`system/preview.html` to see the component library itself.
+Open `index.html` — a read-only overview of every system and its mockups.
+Double-clicking works; no server needed.
 
-No server needed; double-clicking the file works. If you would rather have a
-real origin (so `localStorage` and relative paths behave exactly as they would
-deployed), run `npm run serve`.
-
-## Make a new mockup
+## Start the studio
 
 ```bash
-node tools/new-mockup.mjs "Desktop review — measurement panel" --device desktop
+npm install     # once
+npm run studio  # http://localhost:4173/studio/
+```
+
+Everything you do in the studio writes real files under `systems/`. Nothing
+lives in browser storage, so your work is in git and survives the machine.
+
+## Create a system
+
+**New system** in the studio makes `systems/<family>-v1/` from the defaults.
+To branch from an existing one, open it and **Save as new version**.
+
+## Edit a system
+
+Open a system and you get:
+
+- **Global settings** at the top, boxed in the accent colour because changing
+  one cascades through every token below.
+- **Token groups** underneath — surfaces, text, accent roles, status, radius,
+  spacing, type, fonts, hit targets, motion, XR depth. Each group offers only
+  the control its type allows.
+- **Live preview** on the right, showing the draft rather than what is saved.
+  Switch it between the style guide and any mockup in the system.
+
+Pinning a token away from its derived value marks it **custom** with a reset
+link, so it is never a mystery why a global stopped affecting something.
+
+### Saving
+
+- **Save** writes to the version you are editing.
+- **Save as new version** copies forward and leaves the current one untouched.
+
+Nothing auto-versions. A version is a deliberate step you took.
+
+## Create a mockup
+
+**New mockup** on a system tile, or:
+
+```bash
+node tools/new-mockup.mjs "Desktop review — measurement panel" \
+     --system viewport-xr-v1 --device desktop
 ```
 
 Devices: `ipad-landscape`, `ipad-portrait`, `desktop`, `desktop-wide`,
 `headset`, `phone`.
 
-That creates `mockups/<nnn>-<slug>/index.html` from the template, with the
-title, date and device frame filled in, and updates the gallery.
+Build the layout inside the `<!-- Mockup starts here -->` block using the
+components in the style guide.
 
-Then build the layout inside the `<!-- Mockup starts here -->` block using the
-components in `system/preview.html`.
+## Edit by clicking
 
-## Review it
+Open a mockup from the studio and press **Inspect**. Hover highlights;
+clicking shows which tokens that element actually resolves to — and only those,
+with the right control for each. Changes apply live; **Save** writes them to
+the system as overrides.
 
-Every mockup gets a control bar, injected automatically:
+It is dormant when the page is opened without the studio server, because there
+would be nowhere to save.
 
-| Control | What it shows |
-| --- | --- |
-| **Light theme** | The same layout in the other theme. Both have to work. |
-| **8px grid** | Whether spacing is actually on the scale or just close to it. |
-| **Hit targets** | Outlines every interactive element. Anything that looks small, is. |
-| **Fit to window** | Scales the device frame to your monitor without changing the layout maths inside it. |
+## Review
 
-Every page also gets a sticky bar at the top: **← Gallery**, and a **Prev /
-Next** pager through every page in the repo. <kbd>←</kbd> and <kbd>→</kbd> page
-through, <kbd>Esc</kbd> goes back to the gallery. Arrow keys are handed back to
-whatever is focused, so a slider still works normally.
+Every page carries a sticky bar: **← Gallery** and a **Prev / Next** pager
+through everything. <kbd>←</kbd> <kbd>→</kbd> page, <kbd>Esc</kbd> goes back.
+Arrow keys are handed back to whatever is focused, so a slider still works.
 
-The pager order comes from `gallery/manifest.js` — run `node tools/reindex.mjs`
-after adding a mockup or it will not show up in the run.
+Mockups also get the stage bar: light theme, 8px grid, hit targets,
+fit-to-window.
 
-Then run the audit:
+Then:
 
 ```bash
-node tools/audit.mjs          # everything
-node tools/audit.mjs 003      # one mockup
+npm run audit          # everything
+node tools/audit.mjs viewport-xr   # one system
 ```
 
-It checks text contrast in both themes with translucent fills composited down
-the ancestor stack, and checks every interactive element against `--hit-min`.
-It exits non-zero on failure, so it can gate a commit.
+Contrast in both themes with translucency composited properly, plus hit
+targets, per system. Exits non-zero on failure.
 
-## Iterate
+## Compare a mockup across systems
 
-Change it and reload. There is no build step and nothing to restart.
-
-When a pattern shows up in a second mockup, promote it into
-`system/components.css` and add a specimen to `system/preview.html` in the same
-commit.
+Add `?system=<id>` to any mockup URL and it renders with that system's tokens
+instead of its own. That is how you see whether a palette change actually works
+on a real screen before committing to it.
 
 ## Status
 
-The `Status:` field in a mockup's `.stage__meta` line drives the badge in the
-gallery. Use one of: `draft`, `review`, `approved`, `reference`, `superseded`.
-Run `node tools/reindex.mjs` after changing it.
+The `Status:` field in a mockup's `.stage__meta` line drives its badge.
+Use one of: `draft`, `review`, `approved`, `reference`, `superseded`.
+`npm run index` picks up changes made by hand.
 
 ## Working with Claude
 
-`CLAUDE.md` at the repo root tells Claude the conventions, so you can ask for
-work in plain terms and get something that fits the system:
+`CLAUDE.md` carries the architecture, so plain requests land inside it:
 
-> Build a headset mockup for the layer panel, one-handed, with the tool rail
-> reachable without moving your head.
+> Build a headset mockup in viewport-xr-v1 for the layer panel, one-handed.
 
-> The tool rail is too dense at 5 tools — show me a version with grouping.
+> Make a v2 of the system with a warmer neutral and a tighter type scale.
 
 > Run the audit and fix whatever it finds.
