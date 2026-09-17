@@ -74,31 +74,82 @@ const nextId = (family, taken) => {
   return `${family}-v${n}`;
 };
 
-const createMockup = async (systemId, { title, device = "ipad-landscape" }) => {
-  S.assertId(systemId, "system id");
+/** Render one screen file from the template. */
+const screenHtml = async (title, device, screenTitle) => {
   const frame = DEVICES[device];
   if (!frame) throw Object.assign(new Error(`Unknown device: ${device}`), { status: 400 });
+  const today = new Date().toISOString().slice(0, 10);
+  const template = await readFile(path.join(ROOT, "templates", "mockup.html"), "utf8");
+  return template
+    .replaceAll("TITLE", `${title} — ${screenTitle}`)
+    .replace("DEVICE", frame[1])
+    .replace("YYYY-MM-DD", today)
+    .replace('class="device device--ipad-landscape"', `class="device ${frame[0]}"`)
+    .replace('data-device="iPad Pro · landscape · 1366×1024"', `data-device="${frame[1]}"`);
+};
+
+/**
+ * One mockup, several screens. A mockup is an idea; the screens are how it
+ * lands on each device, so they are created together rather than as separate
+ * mockups that happen to share a name.
+ */
+const createMockup = async (systemId, { title, devices, device }) => {
+  S.assertId(systemId, "system id");
+
+  const wanted = (Array.isArray(devices) && devices.length ? devices : [device || "ipad-landscape"])
+    .filter((d) => DEVICES[d]);
+  if (!wanted.length) throw Object.assign(new Error("No valid devices given"), { status: 400 });
+
+  wanted.sort((a, b) => S.DEVICE_ORDER.indexOf(a) - S.DEVICE_ORDER.indexOf(b));
 
   const existing = (await S.listMockups(systemId)).map((m) => m.id);
   const id = nextId(S.slugify(title || "mockup"), existing);
   const dir = path.join(S.SYSTEMS_DIR, systemId, "mockups", id);
   const today = new Date().toISOString().slice(0, 10);
 
-  const template = await readFile(path.join(ROOT, "templates", "mockup.html"), "utf8");
-  const html = template
-    .replaceAll("TITLE", title || "Untitled")
-    .replace("DEVICE", frame[1])
-    .replace("YYYY-MM-DD", today)
-    .replace('class="device device--ipad-landscape"', `class="device ${frame[0]}"`)
-    .replace('data-device="iPad Pro · landscape · 1366×1024"', `data-device="${frame[1]}"`);
-
   await mkdir(dir, { recursive: true });
-  await writeFile(path.join(dir, "index.html"), html, "utf8");
+
+  const screens = [];
+  for (const d of wanted) {
+    const file = `${d}.html`;
+    const screenTitle = S.DEVICE_LABEL[d] ?? d;
+    await writeFile(path.join(dir, file), await screenHtml(title || "Untitled", d, screenTitle), "utf8");
+    screens.push({ device: d, file, title: screenTitle });
+  }
+
   await writeFile(path.join(dir, "mockup.json"), JSON.stringify({
-    title: title || "Untitled", device, status: "draft", summary: "", created: today, updated: today,
+    title: title || "Untitled", status: "draft", summary: "",
+    created: today, updated: today, screens,
   }, null, 2) + "\n", "utf8");
 
-  return { id, systemId };
+  return { id, systemId, screens: screens.length };
+};
+
+/** Add a screen to a mockup that does not have that device yet. */
+const addScreen = async (systemId, mockupId, device) => {
+  S.assertId(systemId, "system id");
+  S.assertId(mockupId, "mockup id");
+  if (!DEVICES[device]) throw Object.assign(new Error(`Unknown device: ${device}`), { status: 400 });
+
+  const dir = path.join(S.SYSTEMS_DIR, systemId, "mockups", mockupId);
+  const metaFile = path.join(dir, "mockup.json");
+  const meta = JSON.parse(await readFile(metaFile, "utf8"));
+  meta.screens ??= [];
+
+  if (meta.screens.some((sc) => sc.device === device)) {
+    throw Object.assign(new Error(`${mockupId} already has a ${device} screen`), { status: 409 });
+  }
+
+  const file = `${device}.html`;
+  const screenTitle = S.DEVICE_LABEL[device] ?? device;
+  await writeFile(path.join(dir, file), await screenHtml(meta.title, device, screenTitle), "utf8");
+
+  meta.screens.push({ device, file, title: screenTitle });
+  meta.screens.sort((a, b) => S.DEVICE_ORDER.indexOf(a.device) - S.DEVICE_ORDER.indexOf(b.device));
+  meta.updated = new Date().toISOString().slice(0, 10);
+  await writeFile(metaFile, JSON.stringify(meta, null, 2) + "\n", "utf8");
+
+  return { id: mockupId, systemId, device, file };
 };
 
 /** A new version of a mockup: same family, next number, source untouched. */
@@ -189,6 +240,12 @@ const api = async (req, res, url) => {
     // POST /api/systems/:id/mockups/:mockupId/version
     if (req.method === "POST" && seg[4] === "version") {
       const out = await versionMockup(id, subId);
+      await reindex({ regenerateTokens: false });
+      return json(res, 201, out);
+    }
+    // POST /api/systems/:id/mockups/:mockupId/screens  {device}
+    if (req.method === "POST" && seg[4] === "screens") {
+      const out = await addScreen(id, subId, body.device);
       await reindex({ regenerateTokens: false });
       return json(res, 201, out);
     }

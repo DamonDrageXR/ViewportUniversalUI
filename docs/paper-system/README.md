@@ -7,11 +7,26 @@ folder and commit them. They are the reference the design system is derived
 from, and keeping them in the repo means the tokens and the reasoning behind
 them stay together.
 
-## Why they are not here already
+## Nothing in this repo is based on the Paper System
 
-The session that scaffolded this repo ran in a cloud container, not on the
-Viewport machine, so `C:\Users\...\Downloads\` was not reachable from it and
-the files were not in Drive either.
+Worth stating plainly, because the repo looks finished enough to be mistaken
+for it: **the design in `systems/viewport-xr-v1` is a placeholder invented from
+scratch.** It was never derived from the Paper System and is not meant to
+resemble it.
+
+The sessions that built this repo ran in a cloud container with no access to
+the Viewport machine, so `C:\Users\...\Downloads\Paper System — Viewport XR`
+was never readable, and the documents are not in Drive either. Checked more
+than once.
+
+### Getting them here
+
+Either works:
+
+- Drop the `.md` files into a Claude conversation as attachments.
+- Copy them into this folder and commit them.
+
+Then run `/tokens` and the system gets derived from them.
 
 ## What changes once they are in
 

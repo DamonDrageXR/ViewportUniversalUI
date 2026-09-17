@@ -2,12 +2,15 @@
 /**
  * Scaffold a new mockup inside a system.
  *
- *   node tools/new-mockup.mjs "Desktop review — measurement panel" \
- *        --system viewport-xr-v1 --device desktop
+ *   node tools/new-mockup.mjs "Measurement review" \
+ *        --system viewport-xr-v1 --devices phone,ipad-portrait,ipad-landscape
  *
- * Creates systems/<system>/mockups/<slug>-v1/ from templates/mockup.html and
- * refreshes the manifest. If --system is omitted it uses the newest version of
- * the only system, or lists them and stops if there is more than one.
+ * A mockup is ONE idea shown across screen types, so it gets a folder holding
+ * a screen file per device plus a mockup.json listing them. --devices defaults
+ * to the three that matter: phone, iPad portrait, iPad landscape.
+ *
+ * If --system is omitted it uses the newest version of the only system, or
+ * lists them and stops if there is more than one.
  *
  * The studio does the same thing from its UI; this is here for when you are
  * already in a terminal, and for Claude.
@@ -17,7 +20,7 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { listSystems, listMockups, slugify, splitVersion, SYSTEMS_DIR, ROOT } from "./lib/system.mjs";
+import { listSystems, listMockups, slugify, splitVersion, DEVICE_ORDER, DEVICE_LABEL, SYSTEMS_DIR, ROOT } from "./lib/system.mjs";
 import { reindex } from "./reindex.mjs";
 
 const DEVICES = {
@@ -36,7 +39,8 @@ const flag = (argv, name) => {
 
 const main = async () => {
   const argv = process.argv.slice(2);
-  const deviceKey = flag(argv, "device") ?? "ipad-landscape";
+  const deviceList = (flag(argv, "devices") ?? flag(argv, "device") ?? "phone,ipad-portrait,ipad-landscape")
+    .split(",").map((d) => d.trim()).filter(Boolean);
   const systemFlag = flag(argv, "system");
 
   // Strip flags and their values, leaving the title.
@@ -44,22 +48,23 @@ const main = async () => {
     .filter((a, i) => {
       if (a.startsWith("--")) return false;
       const prev = argv[i - 1];
-      return !(prev === "--device" || prev === "--system");
+      return !(prev === "--device" || prev === "--devices" || prev === "--system");
     })
     .join(" ")
     .trim();
 
   if (!title) {
-    console.error('Usage: node tools/new-mockup.mjs "Title" [--system <id>] [--device <device>]');
+    console.error('Usage: node tools/new-mockup.mjs "Title" [--system <id>] [--devices a,b,c]');
     console.error(`Devices: ${Object.keys(DEVICES).join(", ")}`);
     process.exit(1);
   }
 
-  const frame = DEVICES[deviceKey];
-  if (!frame) {
-    console.error(`Unknown device "${deviceKey}". Known: ${Object.keys(DEVICES).join(", ")}`);
+  const unknown = deviceList.filter((d) => !DEVICES[d]);
+  if (unknown.length) {
+    console.error(`Unknown device(s): ${unknown.join(", ")}. Known: ${Object.keys(DEVICES).join(", ")}`);
     process.exit(1);
   }
+  deviceList.sort((a, b) => DEVICE_ORDER.indexOf(a) - DEVICE_ORDER.indexOf(b));
 
   const systems = await listSystems();
   if (systems.length === 0) {
@@ -101,21 +106,30 @@ const main = async () => {
 
   const today = new Date().toISOString().slice(0, 10);
   const template = await readFile(path.join(ROOT, "templates", "mockup.html"), "utf8");
-  const html = template
-    .replaceAll("TITLE", title)
-    .replace("DEVICE", frame[1])
-    .replace("YYYY-MM-DD", today)
-    .replace('class="device device--ipad-landscape"', `class="device ${frame[0]}"`)
-    .replace('data-device="iPad Pro · landscape · 1366×1024"', `data-device="${frame[1]}"`);
 
   await mkdir(dir, { recursive: true });
-  await writeFile(path.join(dir, "index.html"), html, "utf8");
+
+  const screens = [];
+  for (const d of deviceList) {
+    const frame = DEVICES[d];
+    const screenTitle = DEVICE_LABEL[d] ?? d;
+    const html = template
+      .replaceAll("TITLE", `${title} — ${screenTitle}`)
+      .replace("DEVICE", frame[1])
+      .replace("YYYY-MM-DD", today)
+      .replace('class="device device--ipad-landscape"', `class="device ${frame[0]}"`)
+      .replace('data-device="iPad Pro · landscape · 1366×1024"', `data-device="${frame[1]}"`);
+    await writeFile(path.join(dir, `${d}.html`), html, "utf8");
+    screens.push({ device: d, file: `${d}.html`, title: screenTitle });
+  }
+
   await writeFile(path.join(dir, "mockup.json"), JSON.stringify({
-    title, device: deviceKey, status: "draft", summary: "", created: today, updated: today,
+    title, status: "draft", summary: "", created: today, updated: today, screens,
   }, null, 2) + "\n", "utf8");
 
   await reindex({ regenerateTokens: false });
-  console.log(`Created systems/${systemId}/mockups/${id}/index.html`);
+  console.log(`Created systems/${systemId}/mockups/${id}/ with ${screens.length} screen(s):`);
+  for (const sc of screens) console.log(`  ${sc.file}  ${sc.title}`);
 };
 
 main().catch((err) => { console.error(err); process.exit(1); });

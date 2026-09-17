@@ -25,10 +25,11 @@ is still there next session.
 spacing, type scale, density, and every element those produce: buttons, sliders,
 icons, menus, panels, trees.
 
-**Mockups** — what that language looks like on a device. Phone, iPad portrait,
-iPad landscape. Pick a different system at the top and every mockup re-renders
-with it, so a palette or density change can be judged on real screens before
-you commit to it.
+**Mockups** — what that language looks like on a device. **One tile per mockup**,
+holding a screen for each device it covers: phone, iPad portrait, iPad
+landscape. Pick a different system at the top and every screen re-renders with
+it, so a palette or density change can be judged on real screens before you
+commit to it.
 
 ## A system reads top to bottom
 
@@ -38,7 +39,8 @@ Open one and you get three sections in order:
    control its type allows.
 2. **Elements** — the live, interactive component library with those settings
    applied. Not a picture: the real page, embedded.
-3. **Mockups** — the device mockups built with this system.
+3. **Mockups** — the mockups built with this system, each showing all of its
+   screens at once.
 
 ## Click-to-edit
 

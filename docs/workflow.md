@@ -44,18 +44,22 @@ Nothing auto-versions. A version is a deliberate step you took.
 
 ## Create a mockup
 
-**New mockup** on a system tile, or:
+A mockup is **one idea shown across screen types** — one tile, several screens.
+
+**New mockup** in the Mockups view or on a system page, or:
 
 ```bash
-node tools/new-mockup.mjs "Desktop review — measurement panel" \
-     --system viewport-xr-v1 --device desktop
+node tools/new-mockup.mjs "Measurement review" \
+     --system viewport-xr-v1 --devices phone,ipad-portrait,ipad-landscape
 ```
 
-Devices: `ipad-landscape`, `ipad-portrait`, `desktop`, `desktop-wide`,
-`headset`, `phone`.
+Devices: `phone`, `ipad-portrait`, `ipad-landscape`, `desktop`, `desktop-wide`,
+`headset`. `--devices` defaults to the three that matter. **Add screen** on a
+tile adds one later.
 
-Build the layout inside the `<!-- Mockup starts here -->` block using the
-components in the style guide.
+Build each screen's layout inside its `<!-- Mockup starts here -->` block. Give
+each device the job it is actually good at — the phone screen is not the
+landscape one squeezed.
 
 ## Edit by clicking
 
@@ -84,7 +88,8 @@ node tools/audit.mjs viewport-xr   # one system
 ```
 
 Contrast in both themes with translucency composited properly, plus hit
-targets, per system. Exits non-zero on failure.
+targets, per system, and **every screen of every mockup separately** — a layout
+that passes on a tablet can fail on a phone. Exits non-zero on failure.
 
 ## Compare a mockup across systems
 

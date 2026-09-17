@@ -316,28 +316,71 @@ export const readSystem = async (id) => {
   return { ...data, id, family, version, mockups: await listMockups(id) };
 };
 
+/** Canonical device order, so a mockup's screens always read phone → tablet →
+ *  desktop rather than in whatever order they were added. */
+export const DEVICE_ORDER = ["phone", "ipad-portrait", "ipad-landscape", "desktop", "desktop-wide", "headset"];
+
+export const DEVICE_LABEL = {
+  phone: "Phone",
+  "ipad-portrait": "iPad — portrait",
+  "ipad-landscape": "iPad — landscape",
+  desktop: "Desktop",
+  "desktop-wide": "Desktop — wide",
+  headset: "Headset",
+};
+
+/**
+ * A mockup is one idea shown across screen types — one tile, several screens.
+ * Its folder holds a screen file per device plus a mockup.json listing them.
+ */
 export const listMockups = async (systemId) => {
   assertId(systemId, "system id");
   const dir = path.join(SYSTEMS_DIR, systemId, "mockups");
   if (!(await exists(dir))) return [];
+
   const out = [];
   for (const e of await readdir(dir, { withFileTypes: true })) {
     if (!e.isDirectory()) continue;
-    const metaFile = path.join(dir, e.name, "mockup.json");
+    const folder = path.join(dir, e.name);
     const { family, version } = splitVersion(e.name);
+
     let meta = {};
-    try { meta = JSON.parse(await readFile(metaFile, "utf8")); } catch { /* derive below */ }
-    if (!(await exists(path.join(dir, e.name, "index.html")))) continue;
+    try { meta = JSON.parse(await readFile(path.join(folder, "mockup.json"), "utf8")); } catch { /* below */ }
+
+    // A mockup written before screens existed is a single index.html; treat it
+    // as a one-screen mockup rather than making it disappear.
+    let screens = Array.isArray(meta.screens) && meta.screens.length
+      ? meta.screens
+      : (await exists(path.join(folder, "index.html"))
+          ? [{ device: meta.device || "ipad-landscape", file: "index.html", title: meta.title || e.name }]
+          : []);
+
+    const present = [];
+    for (const sc of screens) {
+      if (!sc?.file || sc.file.includes("/") || sc.file.includes("..")) continue;
+      if (!(await exists(path.join(folder, sc.file)))) continue;
+      present.push({
+        device: sc.device,
+        file: sc.file,
+        title: sc.title || DEVICE_LABEL[sc.device] || sc.device,
+        href: `systems/${systemId}/mockups/${e.name}/${sc.file}`,
+      });
+    }
+    if (!present.length) continue;
+
+    present.sort((a, b) => DEVICE_ORDER.indexOf(a.device) - DEVICE_ORDER.indexOf(b.device));
+
     out.push({
       id: e.name,
       family,
       version,
       title: meta.title || e.name,
-      device: meta.device || "ipad-landscape",
       status: meta.status || "draft",
       summary: meta.summary || "",
       updated: meta.updated || "",
-      href: `systems/${systemId}/mockups/${e.name}/index.html`,
+      screens: present,
+      devices: present.map((s) => s.device),
+      href: present[0].href,
     });
   }
   return out.sort((a, b) => (a.family === b.family ? b.version - a.version : a.family.localeCompare(b.family)));

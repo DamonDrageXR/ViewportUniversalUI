@@ -178,13 +178,19 @@ const pagesToAudit = async (filter) => {
         query: `?system=${sys.name}`,
       });
 
+      // A mockup holds one screen per device, and each is a page in its own
+      // right — a layout that passes on a tablet can fail on a phone.
       const mockups = path.join(systems, sys.name, "mockups");
       try {
         for (const m of await readdir(mockups, { withFileTypes: true })) {
           if (!m.isDirectory()) continue;
-          const file = path.join(mockups, m.name, "index.html");
-          try { await access(file, constants.R_OK); } catch { continue; }
-          pages.push({ name: `${sys.name}/${m.name}`, url: file });
+          for (const f of await readdir(path.join(mockups, m.name))) {
+            if (!f.endsWith(".html")) continue;
+            pages.push({
+              name: `${sys.name}/${m.name}/${f.replace(/\.html$/, "")}`,
+              url: path.join(mockups, m.name, f),
+            });
+          }
         }
       } catch { /* a system with no mockups yet */ }
     }

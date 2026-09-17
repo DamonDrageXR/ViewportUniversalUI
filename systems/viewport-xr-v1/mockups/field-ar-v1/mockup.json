@@ -1,0 +1,24 @@
+{
+  "title": "Field AR",
+  "status": "review",
+  "summary": "The GEAAR field tool across every screen it ships on. Each device gets the job it is actually good at rather than the same layout rescaled.",
+  "created": "2026-09-17",
+  "updated": "2026-09-17",
+  "screens": [
+    {
+      "device": "phone",
+      "file": "phone.html",
+      "title": "Quick capture"
+    },
+    {
+      "device": "ipad-portrait",
+      "file": "ipad-portrait.html",
+      "title": "Site brief"
+    },
+    {
+      "device": "ipad-landscape",
+      "file": "ipad-landscape.html",
+      "title": "Layer control"
+    }
+  ]
+}

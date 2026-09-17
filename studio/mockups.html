@@ -78,6 +78,8 @@
   const note = document.getElementById("render-note");
   const groupToggle = document.getElementById("group-device");
 
+  const ORDER = ["phone", "ipad-portrait", "ipad-landscape", "desktop", "desktop-wide", "headset"];
+
   const DEVICE_LABEL = {
     phone: "Phone",
     "ipad-portrait": "iPad — portrait",
@@ -114,9 +116,7 @@
           <h2>${VPTiles.esc(labelOf(k, list))}</h2>
           <span class="vp-badge">${list.length}</span>
         </header>
-        <div class="vp-mockups" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr))">
-          ${tiles(list)}
-        </div>
+        <div class="vp-mockups">${tiles(list)}</div>
       </section>`).join("");
   };
 
@@ -127,9 +127,29 @@
         '<p class="vp-empty">No mockups yet. <strong>New mockup</strong> above creates one in a system.</p>';
       return;
     }
-    host.innerHTML = groupToggle.checked
-      ? group(items, (m) => m.device, (k) => DEVICE_LABEL[k] ?? k)
-      : group(items, (m) => m.systemId, (k, list) => list[0].systemName);
+    if (!groupToggle.checked) {
+      host.innerHTML = group(items, (m) => m.systemId, (k, list) => list[0].systemName);
+      return;
+    }
+    // Grouped by device, a mockup appears once per screen type it covers,
+    // showing only that screen — the way to compare every phone layout at once.
+    const byDevice = new Map();
+    for (const m of items) {
+      for (const sc of m.screens ?? []) {
+        if (!byDevice.has(sc.device)) byDevice.set(sc.device, []);
+        byDevice.get(sc.device).push({ ...m, screens: [sc] });
+      }
+    }
+    host.innerHTML = [...byDevice.entries()]
+      .sort((a, b) => ORDER.indexOf(a[0]) - ORDER.indexOf(b[0]))
+      .map(([device, list]) => `
+        <section class="vp-tiles__group">
+          <header class="vp-tiles__grouphead">
+            <h2>${VPTiles.esc(DEVICE_LABEL[device] ?? device)}</h2>
+            <span class="vp-badge">${list.length}</span>
+          </header>
+          <div class="vp-mockups">${tiles(list)}</div>
+        </section>`).join("");
   };
 
   const load = async () => {
@@ -167,12 +187,23 @@
           ? systems[0].id
           : ask(`Which system?  ${systems.map((s) => s.id).join(", ")}`, systems[0].id);
         if (!sysId) return;
-        const device = ask(
-          "Device: phone, ipad-portrait, ipad-landscape, desktop, desktop-wide, headset",
-          "ipad-landscape");
+        const devices = ask(
+          "Screens, comma separated (phone, ipad-portrait, ipad-landscape, desktop, desktop-wide, headset)",
+          "phone,ipad-portrait,ipad-landscape");
+        if (!devices) return;
+        const created = await api("POST", `/systems/${sysId}/mockups`, {
+          title, devices: devices.split(",").map((d) => d.trim()).filter(Boolean),
+        });
+        toast(`Created ${created.id} with ${created.screens} screen(s)`, "vp-badge--positive");
+        await load();
+        return;
+      }
+
+      if (action === "screen-new") {
+        const device = ask("Screen to add (phone, ipad-portrait, ipad-landscape, desktop, desktop-wide, headset)", "desktop");
         if (!device) return;
-        const created = await api("POST", `/systems/${sysId}/mockups`, { title, device });
-        toast(`Created ${created.id}`, "vp-badge--positive");
+        await api("POST", `/systems/${system}/mockups/${id}/screens`, { device });
+        toast(`Added ${device} screen to ${id}`, "vp-badge--positive");
         await load();
         return;
       }

@@ -100,69 +100,98 @@
   flex-wrap: wrap;
 }
 
-/* ---- Mockup tile --------------------------------------------------------- */
-.vp-mockups {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: var(--space-2);
-}
-
+/* ---- Mockup tile ---------------------------------------------------------
+   One card per mockup, holding a thumbnail per screen type. The tile is the
+   idea; the screens inside it are how that idea lands on each device. */
 .vp-mockup {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background: var(--surface-2);
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: var(--stroke-hairline) solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--surface-1);
+}
+
+.vp-mockup__head { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+
+.vp-mockup__title { font-size: var(--text-base); font-weight: var(--weight-semibold); }
+.vp-mockup__sub { font-size: var(--text-xs); color: var(--text-muted); }
+
+.vp-mockup__summary {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  max-width: 72ch;
+}
+
+.vp-screens {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.vp-screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
   text-decoration: none;
   color: inherit;
+  min-width: 0;
+}
+
+/* A fixed-height band, with each screen letterboxed inside it at its own true
+   proportion. Letting every thumbnail keep its own aspect ratio instead made
+   the phone column four times the height of the landscape one and wrecked the
+   row; this way a phone still reads as a phone, without dictating the layout. */
+.vp-screen__shot {
+  position: relative;
+  display: block;
+  height: 210px;
+  overflow: hidden;
+  border: var(--stroke-hairline) solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
   transition: border-color var(--duration-fast) var(--ease-standard);
 }
 
-.vp-mockup:hover { border-color: var(--border-strong); }
+.vp-screen:hover .vp-screen__shot { border-color: var(--accent); }
 
-/* The thumbnail is the real mockup in an iframe, scaled down — never a stale
-   screenshot that has to be regenerated and will eventually lie. */
-.vp-mockup__shot {
-  position: relative;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  background: var(--surface-sunken);
-}
-
-.vp-mockup__shot iframe {
+.vp-screen__shot iframe {
   position: absolute;
   top: 0;
   left: 0;
-  width: 1366px;
-  height: 1024px;
   border: 0;
   transform-origin: top left;
   pointer-events: none;
 }
 
-.vp-mockup__meta {
-  padding: var(--space-2) var(--space-3);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  min-width: 0;
+.vp-screen__meta { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+
+.vp-screen__device {
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
-.vp-mockup__title {
+.vp-screen__title {
   font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
+  color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.vp-mockup__tags { display: flex; gap: var(--space-1); flex-wrap: wrap; }
+.vp-screen:hover .vp-screen__title { color: var(--text-primary); }
 
 .vp-mockup__actions {
   display: flex;
-  gap: var(--space-1);
-  padding: 0 var(--space-2) var(--space-2);
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  padding-top: var(--space-3);
+  border-top: var(--stroke-hairline) solid var(--border-subtle);
+  margin-top: auto;
 }
 
 .vp-empty {

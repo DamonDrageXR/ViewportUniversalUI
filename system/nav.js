@@ -45,10 +45,11 @@
       a.family === b.family ? b.version - a.version : a.family.localeCompare(b.family));
 
     const mockups = ordered.flatMap((s) =>
-      (s.mockups ?? []).map((m) => ({
-        href: at(m.href),
-        title: `${m.title} — ${s.name} v${s.version}`
-      })));
+      (s.mockups ?? []).flatMap((m) =>
+        (m.screens ?? []).map((sc) => ({
+          href: at(sc.href),
+          title: `${m.title} · ${sc.title} — ${s.name} v${s.version}`
+        }))));
 
     return [
       { href: at("system/preview.html"), title: "System preview" },

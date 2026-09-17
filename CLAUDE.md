@@ -14,7 +14,9 @@ system/       the engine, shared by every system:
 systems/      one folder per system VERSION:
               <family>-v<n>/system.json   globals + explicit overrides
               <family>-v<n>/tokens.css    GENERATED — never hand-edit
-              <family>-v<n>/mockups/<family>-v<n>/{index.html, mockup.json}
+              <family>-v<n>/mockups/<family>-v<n>/
+                mockup.json  title, status, summary, screens[]
+                phone.html · ipad-portrait.html · ipad-landscape.html
               manifest.js — GENERATED index
 studio/       the editing app (needs the server):
               index.html   tile view 1 — systems
@@ -50,6 +52,24 @@ A sweep of 432 accent/theme combinations across the hue circle stays above AA.
 If you add a colour role, derive it the same way — do not hand-pick a hex and
 hope. `C.solidFor(hex, against, target)` and `C.fgFor(hex, against, target)`
 in `tools/lib/color.mjs` are there for this.
+
+## A mockup is one idea, several screens
+
+One tile per mockup. Inside it, one screen file per device, listed in
+`mockup.json`'s `screens` array. Phone, iPad portrait and iPad landscape are
+the usual three.
+
+Each screen is a real page and gets audited on its own, because a layout that
+passes on a tablet can fail on a phone. Give each device the job it is good at
+rather than rescaling one layout — the phone screen is not the landscape one
+squeezed.
+
+```bash
+node tools/new-mockup.mjs "Title" --system <id> --devices phone,ipad-portrait
+```
+
+A mockup written before screens existed (a bare `index.html` with a `device`
+field) still loads as a one-screen mockup; don't delete those, migrate them.
 
 ## Versions are explicit and never overwrite
 

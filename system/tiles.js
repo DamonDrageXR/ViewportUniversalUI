@@ -46,41 +46,73 @@
     `<button class="vp-btn vp-btn--secondary" type="button"
              data-action="${esc(action)}" data-id="${esc(id)}" ${extra}>${esc(label)}</button>`;
 
+  const DEVICE_LABEL = {
+    phone: "Phone",
+    "ipad-portrait": "iPad — portrait",
+    "ipad-landscape": "iPad — landscape",
+    desktop: "Desktop",
+    "desktop-wide": "Desktop — wide",
+    headset: "Headset",
+  };
+
   /**
-   * A mockup card. The thumbnail is the live mockup in a scaled iframe rather
-   * than a stored screenshot — a screenshot would need regenerating on every
-   * token change and would quietly go stale between times.
+   * A mockup card: ONE tile per idea, holding a thumbnail per screen type.
+   * The thumbnails are the live screens in scaled iframes rather than stored
+   * screenshots, which would need regenerating on every token change and would
+   * quietly go stale between times.
    */
   const mockupTile = (m, { base = "", systemId = "", actions = false, systemName = "", renderAs = "" } = {}) => {
-    // renderAs lets the mockup view show every mockup under one chosen system,
+    // renderAs lets one view show every mockup under a single chosen system,
     // rather than each under the one it happens to live in.
-    const retarget = renderAs && renderAs !== systemId ? `?system=${encodeURIComponent(renderAs)}` : "";
-    const href = `${base}${m.href}${retarget}`;
-    // The tile links to the full page but embeds the bare one.
-    const thumb = `${base}${m.href}?chrome=0${retarget ? `&system=${encodeURIComponent(renderAs)}` : ""}`;
-    const w = DEVICE_WIDTH[m.device] ?? 1366;
-    const h = DEVICE_HEIGHT[m.device] ?? 1024;
+    const retarget = renderAs && renderAs !== systemId ? renderAs : "";
+    const q = (extra) => {
+      const parts = [];
+      if (extra) parts.push(extra);
+      if (retarget) parts.push(`system=${encodeURIComponent(retarget)}`);
+      return parts.length ? `?${parts.join("&")}` : "";
+    };
+
+    const screens = m.screens ?? [];
+
+    const screenCell = (sc) => {
+      const w = DEVICE_WIDTH[sc.device] ?? 1366;
+      const h = DEVICE_HEIGHT[sc.device] ?? 1024;
+      return `
+        <a class="vp-screen" href="${esc(base + sc.href + q(""))}" title="${esc(sc.title)}">
+          <span class="vp-screen__shot" data-ratio="${(w / h).toFixed(3)}">
+            <iframe src="${esc(base + sc.href + q("chrome=0"))}" loading="lazy" tabindex="-1"
+                    aria-hidden="true" scrolling="no" data-fit-w="${w}" data-fit-h="${h}"></iframe>
+          </span>
+          <span class="vp-screen__meta">
+            <span class="vp-screen__device">${esc(DEVICE_LABEL[sc.device] ?? sc.device)}</span>
+            <span class="vp-screen__title">${esc(sc.title)}</span>
+          </span>
+        </a>`;
+    };
 
     return `
-      <div class="vp-mockup" data-mockup="${esc(m.id)}">
-        <a class="vp-mockup__shot" href="${esc(href)}" title="${esc(m.title)}">
-          <iframe src="${esc(thumb)}" loading="lazy" tabindex="-1" aria-hidden="true"
-                  scrolling="no" data-fit-w="${w}" data-fit-h="${h}"></iframe>
-        </a>
-        <div class="vp-mockup__meta">
-          <span class="vp-mockup__title">${esc(m.title)}</span>
-          <span class="vp-mockup__tags">
-            <span class="vp-badge">v${esc(m.version)}</span>
-            <span class="vp-badge">${esc(m.device)}</span>
-            <span class="vp-badge ${STATUS_TONE[m.status] ?? ""}">${esc(m.status)}</span>
-            ${systemName ? `<span class="vp-badge vp-badge--accent">${esc(systemName)}</span>` : ""}
+      <article class="vp-mockup" data-mockup="${esc(m.id)}">
+        <header class="vp-mockup__head">
+          <span class="u-grow">
+            <span class="vp-mockup__title">${esc(m.title)}</span>
+            <span class="vp-mockup__sub"> · v${esc(m.version)}</span>
           </span>
-        </div>
+          <span class="vp-badge ${STATUS_TONE[m.status] ?? ""}">${esc(m.status)}</span>
+          ${systemName ? `<span class="vp-badge vp-badge--accent">${esc(systemName)}</span>` : ""}
+        </header>
+
+        ${m.summary ? `<p class="vp-mockup__summary">${esc(m.summary)}</p>` : ""}
+
+        ${screens.length
+          ? `<div class="vp-screens">${screens.map(screenCell).join("")}</div>`
+          : `<p class="vp-empty">No screens in this mockup.</p>`}
+
         ${actions ? `<div class="vp-mockup__actions">
-          ${btn("Version", "mockup-version", m.id, `data-system="${esc(systemId)}"`)}
+          ${btn("Add screen", "screen-new", m.id, `data-system="${esc(systemId)}"`)}
+          ${btn("New version", "mockup-version", m.id, `data-system="${esc(systemId)}"`)}
           ${btn("Delete", "mockup-delete", m.id, `data-system="${esc(systemId)}"`)}
         </div>` : ""}
-      </div>`;
+      </article>`;
   };
 
   const systemTile = (s, { base = "", actions = false } = {}) => {
@@ -126,15 +158,20 @@
 
   /** Scale every thumbnail iframe so a full device viewport fits its frame. */
   const fitThumbnails = (scope = document) => {
-    scope.querySelectorAll(".vp-mockup__shot iframe").forEach((frame) => {
-      const box = frame.parentElement.getBoundingClientRect();
-      if (!box.width) return;
+    scope.querySelectorAll(".vp-screen__shot").forEach((shot) => {
+      const frame = shot.querySelector("iframe");
+      if (!frame) return;
       const w = Number(frame.dataset.fitW) || 1366;
       const h = Number(frame.dataset.fitH) || 1024;
+      const box = shot.getBoundingClientRect();
+      if (!box.width) return;
       const scale = Math.min(box.width / w, box.height / h);
       frame.style.width = `${w}px`;
       frame.style.height = `${h}px`;
       frame.style.transform = `scale(${scale})`;
+      // Centre it in the band rather than pinning it to the corner.
+      frame.style.left = `${(box.width - w * scale) / 2}px`;
+      frame.style.top = `${(box.height - h * scale) / 2}px`;
     });
   };
 

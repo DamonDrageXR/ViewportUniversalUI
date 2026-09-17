@@ -222,8 +222,8 @@
       ? mockups.map((m) => window.VPTiles.mockupTile(m, {
           base: "../", systemId, actions: true,
         })).join("")
-      : `<p class="vp-empty">No mockups in this system yet. Phone, iPad portrait and iPad
-         landscape are the usual three.</p>`;
+      : `<p class="vp-empty">No mockups in this system yet. A mockup is one idea with a screen
+         per device — phone, iPad portrait and iPad landscape are the usual three.</p>`;
   };
 
   const renderAll = () => { renderHeader(); renderGlobals(); renderGroups(); };
@@ -353,6 +353,14 @@
     if (action) {
       const { action: name, id, system } = action.dataset;
       try {
+        if (name === "screen-new") {
+          const device = window.Studio.ask("Screen to add (phone, ipad-portrait, ipad-landscape, desktop, desktop-wide, headset)", "desktop");
+          if (!device) return;
+          await api("POST", `/systems/${system}/mockups/${id}/screens`, { device });
+          toast(`Added ${device} screen`, "vp-badge--positive");
+          await reloadMockups();
+          return;
+        }
         if (name === "mockup-version") {
           const created = await api("POST", `/systems/${system}/mockups/${id}/version`);
           toast(`${created.id} created from ${created.derivedFrom}`, "vp-badge--positive");
@@ -394,12 +402,14 @@
     if (act.dataset.act === "mockup-new") {
       const title = window.Studio.ask("Title for the new mockup", "New mockup");
       if (!title) return;
-      const device = window.Studio.ask(
-        "Device: phone, ipad-portrait, ipad-landscape, desktop, desktop-wide, headset",
-        "ipad-landscape");
-      if (!device) return;
-      const created = await api("POST", `/systems/${systemId}/mockups`, { title, device });
-      toast(`Created ${created.id}`, "vp-badge--positive");
+      const devices = window.Studio.ask(
+        "Screens, comma separated (phone, ipad-portrait, ipad-landscape, desktop, desktop-wide, headset)",
+        "phone,ipad-portrait,ipad-landscape");
+      if (!devices) return;
+      const created = await api("POST", `/systems/${systemId}/mockups`, {
+        title, devices: devices.split(",").map((d) => d.trim()).filter(Boolean),
+      });
+      toast(`Created ${created.id} with ${created.screens} screen(s)`, "vp-badge--positive");
       await reloadMockups();
       return;
     }
