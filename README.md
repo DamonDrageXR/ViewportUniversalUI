@@ -36,7 +36,8 @@ node tools/reindex.mjs    # refresh the gallery
 ## How it is put together
 
 ```
-system/       tokens.css · base.css · components.css · stage.css · stage.js · preview.html
+system/       tokens.css · base.css · components.css · stage.css · stage.js
+              nav.css · nav.js · preview.html
 templates/    mockup.html
 mockups/      <nnn>-<slug>/index.html
 gallery/      manifest.js

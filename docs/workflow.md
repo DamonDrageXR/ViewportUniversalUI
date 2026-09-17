@@ -35,6 +35,14 @@ Every mockup gets a control bar, injected automatically:
 | **Hit targets** | Outlines every interactive element. Anything that looks small, is. |
 | **Fit to window** | Scales the device frame to your monitor without changing the layout maths inside it. |
 
+Every page also gets a sticky bar at the top: **← Gallery**, and a **Prev /
+Next** pager through every page in the repo. <kbd>←</kbd> and <kbd>→</kbd> page
+through, <kbd>Esc</kbd> goes back to the gallery. Arrow keys are handed back to
+whatever is focused, so a slider still works normally.
+
+The pager order comes from `gallery/manifest.js` — run `node tools/reindex.mjs`
+after adding a mockup or it will not show up in the run.
+
 Then run the audit:
 
 ```bash

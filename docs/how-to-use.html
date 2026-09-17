@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="../system/tokens.css">
 <link rel="stylesheet" href="../system/base.css">
 <link rel="stylesheet" href="../system/components.css">
+<link rel="stylesheet" href="../system/nav.css">
 <style>
   body { padding: var(--space-7) var(--space-5); }
   .doc { max-width: 76ch; margin-inline: auto; display: flex; flex-direction: column; gap: var(--space-5); }
@@ -62,6 +63,22 @@
   </section>
 
   <section>
+    <h2>Paging through</h2>
+    <p>
+      Every page except the gallery has a sticky bar at the top: <strong>← Gallery</strong>,
+      and a <strong>Prev / Next</strong> pager through everything in the repo.
+    </p>
+    <table>
+      <thead><tr><th>Key</th><th>Does</th></tr></thead>
+      <tbody>
+        <tr><td><kbd>←</kbd> <kbd>→</kbd></td><td>Page back and forward.</td></tr>
+        <tr><td><kbd>Esc</kbd></td><td>Back to the gallery.</td></tr>
+      </tbody>
+    </table>
+    <p>Arrow keys are handed back to whatever is focused, so a slider or a text field still behaves normally.</p>
+  </section>
+
+  <section>
     <h2>Check it</h2>
     <pre>node tools/audit.mjs</pre>
     <p>
@@ -87,5 +104,6 @@
   </section>
 
 </div>
+<script src="../system/nav.js" defer></script>
 </body>
 </html>

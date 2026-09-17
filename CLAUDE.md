@@ -10,7 +10,8 @@ No framework, no bundler, no build step. A mockup is one folder with one
 `index.html` that opens by double-clicking it.
 
 ```
-system/       tokens.css · base.css · components.css · stage.css · stage.js · preview.html
+system/       tokens.css · base.css · components.css · stage.css · stage.js
+              nav.css · nav.js · preview.html
 templates/    mockup.html — the starting point for a new mockup
 mockups/      <nnn>-<slug>/index.html — one folder per mockup
 gallery/      manifest.js — the index the root gallery reads
@@ -70,6 +71,16 @@ checks text contrast against WCAG AA and every interactive element against
 
 Do not "fix" a finding by exempting it from the audit. If a finding is a genuine
 false positive, fix the *check* and say so.
+
+## Review navigation
+
+Every page except the gallery carries a sticky bar with a back link and a
+prev/next pager (`system/nav.css` + `system/nav.js`, two lines in the page
+head and body). `templates/mockup.html` already wires it, so a scaffolded
+mockup gets it for free — do not add it by hand.
+
+The pager order is built from `gallery/manifest.js`, so run
+`node tools/reindex.mjs` after adding a mockup or it will not appear in the run.
 
 ## Adding a component
 

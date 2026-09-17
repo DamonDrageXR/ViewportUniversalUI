@@ -1,0 +1,103 @@
+/* ==========================================================================
+   Viewport Universal UI — Review navigation
+   --------------------------------------------------------------------------
+   The bar that lets you step through every page in the repo without going back
+   to the gallery each time. Pairs with system/nav.js — link both, or neither.
+
+   Review scaffolding, like stage.css. None of it ships.
+   ========================================================================== */
+
+.vp-nav {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-toolbar);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-glass-strong);
+  backdrop-filter: blur(var(--blur-panel));
+  -webkit-backdrop-filter: blur(var(--blur-panel));
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.vp-nav__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--hit-min);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.vp-nav__link:hover {
+  background: var(--surface-raised);
+  color: var(--text-primary);
+}
+
+/* At either end of the run. Kept in the layout rather than removed so the bar
+   does not reflow as you page through. */
+.vp-nav__link[aria-disabled="true"] {
+  color: var(--text-disabled);
+  pointer-events: none;
+}
+
+.vp-nav__divider {
+  align-self: stretch;
+  width: 1px;
+  margin: var(--space-2) var(--space-2);
+  background: var(--border-default);
+}
+
+.vp-nav__here {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-inline: var(--space-2);
+  min-width: 0;
+}
+
+.vp-nav__count {
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.vp-nav__title {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vp-nav__hint {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  padding-right: var(--space-2);
+}
+
+/* The keyboard hint is the first thing worth dropping on a narrow window. */
+@media (max-width: 720px) {
+  .vp-nav__hint { display: none; }
+}
+
+.vp-nav kbd {
+  display: inline-block;
+  padding: 1px var(--space-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}

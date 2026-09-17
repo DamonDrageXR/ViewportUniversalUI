@@ -119,12 +119,25 @@ const collect = (textSel, interactiveSel) => {
 
   const targets = [...document.querySelectorAll(interactiveSel)]
     .filter((el) => el.offsetParent !== null && !inStage(el) && !el.matches(":disabled"))
-    // Skip controls the user cannot hit directly: a visually hidden <input>
-    // wrapped by a label is targeted through the label, which is measured too.
     .filter((el) => {
       const cs = getComputedStyle(el);
+
+      // Skip controls the user cannot hit directly: a visually hidden <input>
+      // wrapped by a label is targeted through the label, which is measured too.
       if (cs.visibility === "hidden" || cs.pointerEvents === "none") return false;
       if (Number(cs.opacity) === 0) return false;
+
+      // WCAG 2.5.8 exempts inline targets — "the target is in a sentence or its
+      // size is otherwise constrained by the line-height of non-target text".
+      // A link inside running prose cannot be 44px tall without wrecking the
+      // paragraph, and is not what the rule is protecting. Detected as: renders
+      // inline, and its parent carries text beyond the link itself.
+      if (cs.display === "inline" && el.parentElement) {
+        const own = (el.textContent || "").trim();
+        const surrounding = (el.parentElement.textContent || "").trim();
+        if (surrounding.length > own.length) return false;
+      }
+
       return true;
     })
     .map((el) => {
@@ -143,7 +156,13 @@ const collect = (textSel, interactiveSel) => {
 
 /* ---- Runner -------------------------------------------------------------- */
 const pagesToAudit = async (filter) => {
-  const pages = [{ name: "system/preview.html", url: path.join(ROOT, "system", "preview.html") }];
+  // Every page a reviewer can reach, not just the mockups — the gallery and
+  // the docs page carry real interactive UI too.
+  const pages = [
+    { name: "index.html", url: path.join(ROOT, "index.html") },
+    { name: "system/preview.html", url: path.join(ROOT, "system", "preview.html") },
+    { name: "docs/how-to-use.html", url: path.join(ROOT, "docs", "how-to-use.html") },
+  ];
   const dir = path.join(ROOT, "mockups");
   try {
     await access(dir, constants.R_OK);
