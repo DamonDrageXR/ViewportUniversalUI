@@ -1,0 +1,163 @@
+/* ==========================================================================
+   Viewport Universal UI — Stage
+   --------------------------------------------------------------------------
+   Framing chrome for mockups. A layout means nothing without the surface it
+   lives on: an iPad held in the field, a desktop window, or a headset's field
+   of view. The stage supplies that surface at a truthful aspect ratio so a
+   panel that "looks fine" on a laptop cannot quietly be unreadable in a Quest.
+
+   This file is mockup scaffolding. None of it ships.
+   ========================================================================== */
+
+.stage {
+  min-height: 100vh;
+  padding: var(--space-6) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 0%, var(--surface-2), transparent 70%),
+    var(--surface-0);
+}
+
+.stage__header {
+  width: min(var(--content-max), 100%);
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.stage__title { font-size: var(--text-xl); }
+
+.stage__meta { font-size: var(--text-sm); color: var(--text-muted); }
+
+.stage__notes {
+  width: min(var(--content-max), 100%);
+  padding: var(--space-4);
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.stage__notes h2 {
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ---- Device frames -------------------------------------------------------
+   Pick the one that matches the target. Sizes are the real logical-pixel
+   viewports of the devices Viewport ships to, so type size and hit targets
+   are being judged at true scale. */
+.device {
+  position: relative;
+  flex: 0 0 auto;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-4);
+  overflow: hidden;
+  background: var(--surface-1);
+  max-width: 100%;
+}
+
+.device::after {
+  content: attr(data-device);
+  position: absolute;
+  top: calc(-1 * var(--space-5));
+  left: 0;
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.device--ipad-landscape { width: 1366px; height: 1024px; }
+.device--ipad-portrait  { width: 1024px; height: 1366px; }
+.device--desktop        { width: 1440px; height: 900px; }
+.device--desktop-wide   { width: 1920px; height: 1080px; }
+.device--phone          { width: 393px;  height: 852px; border-radius: var(--radius-xl); }
+
+/* Headset framing. A Quest 3 panel at a comfortable 1.5 m sits in roughly a
+   1000x1000 logical-pixel window inside a much wider FOV; the vignette is the
+   comfortable-reading region. Anything outside it needs a head turn. */
+.device--headset {
+  width: 1280px;
+  height: 800px;
+  border-radius: var(--radius-xl);
+  background: var(--surface-0);
+}
+
+.device--headset::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-toast);
+  background: radial-gradient(
+    ellipse 62% 78% at 50% 50%,
+    transparent 60%,
+    rgb(0 0 0 / 0.55) 100%
+  );
+}
+
+/* The surface the UI is composited over. Swap --stage-scene for a real
+   screenshot of the 3D scene or camera feed to judge contrast honestly —
+   translucent panels are the easiest thing in XR to get wrong. */
+.device__scene {
+  position: absolute;
+  inset: 0;
+  background:
+    var(--stage-scene, linear-gradient(145deg, #223042 0%, #3c5166 40%, #6b7d52 75%, #8a7b4e 100%));
+  background-size: cover;
+  background-position: center;
+}
+
+.device__ui {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  min-height: 0;
+}
+
+/* Scale a frame down to fit the browser window without changing the layout
+   maths inside it. Add `is-fit` to .device, or toggle it from the stage bar. */
+.device.is-fit {
+  transform-origin: top center;
+  transform: scale(var(--fit-scale, 1));
+  margin-bottom: calc((var(--fit-scale, 1) - 1) * var(--fit-height, 0px));
+}
+
+/* ---- Spec overlay --------------------------------------------------------
+   Toggle with `.stage.show-grid` / `.stage.show-hit`. Wired up by
+   system/stage.js. */
+.stage.show-grid .device__ui::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-popover);
+  background:
+    repeating-linear-gradient(to right, rgb(30 136 255 / 0.18) 0 1px, transparent 1px var(--space-2)),
+    repeating-linear-gradient(to bottom, rgb(30 136 255 / 0.18) 0 1px, transparent 1px var(--space-2));
+}
+
+.stage.show-hit :is(button, a, input, select, [role="button"], [role="option"], .vp-tree__row) {
+  outline: 1px solid rgb(217 69 63 / 0.7);
+  outline-offset: -1px;
+}
+
+.stage__bar {
+  width: min(var(--content-max), 100%);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}

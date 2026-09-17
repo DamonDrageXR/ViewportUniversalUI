@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to use — Viewport Universal UI</title>
+<link rel="stylesheet" href="../system/tokens.css">
+<link rel="stylesheet" href="../system/base.css">
+<link rel="stylesheet" href="../system/components.css">
+<style>
+  body { padding: var(--space-7) var(--space-5); }
+  .doc { max-width: 76ch; margin-inline: auto; display: flex; flex-direction: column; gap: var(--space-5); }
+  .doc h2 { margin-top: var(--space-4); }
+  .doc p, .doc li { color: var(--text-secondary); }
+  .doc ol, .doc ul { padding-left: var(--space-5); display: flex; flex-direction: column; gap: var(--space-2); }
+  pre {
+    background: var(--surface-sunken); border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md); padding: var(--space-3) var(--space-4);
+    overflow-x: auto; font-size: var(--text-sm); color: var(--text-primary);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+  th, td { text-align: left; padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--border-subtle); }
+  th { color: var(--text-muted); font-size: var(--text-xs); letter-spacing: var(--tracking-wide); text-transform: uppercase; }
+  td { color: var(--text-secondary); }
+</style>
+</head>
+<body>
+<div class="doc">
+
+  <header>
+    <h1>How to use this repo</h1>
+    <p>Everything here is plain HTML and CSS. There is no build step, no framework and nothing to install to look at a mockup.</p>
+  </header>
+
+  <section>
+    <h2>Look at what exists</h2>
+    <ul>
+      <li><a href="../index.html">Gallery</a> — every mockup in the repo.</li>
+      <li><a href="../system/preview.html">System preview</a> — the component library itself, rendered.</li>
+    </ul>
+    <p>Double-clicking the files works. For a real origin, run <code>npm run serve</code>.</p>
+  </section>
+
+  <section>
+    <h2>Make a new mockup</h2>
+    <pre>node tools/new-mockup.mjs "Desktop review — measurement panel" --device desktop</pre>
+    <p>Devices: <code>ipad-landscape</code>, <code>ipad-portrait</code>, <code>desktop</code>, <code>desktop-wide</code>, <code>headset</code>, <code>phone</code>.</p>
+  </section>
+
+  <section>
+    <h2>The review bar</h2>
+    <p>Every mockup gets these four controls automatically:</p>
+    <table>
+      <thead><tr><th>Control</th><th>What it shows</th></tr></thead>
+      <tbody>
+        <tr><td>Light theme</td><td>The same layout in the other theme. Both have to work.</td></tr>
+        <tr><td>8px grid</td><td>Whether spacing is on the scale or just close to it.</td></tr>
+        <tr><td>Hit targets</td><td>Outlines every interactive element.</td></tr>
+        <tr><td>Fit to window</td><td>Scales the frame without changing the layout inside it.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Check it</h2>
+    <pre>node tools/audit.mjs</pre>
+    <p>
+      Checks text contrast in both themes — with translucent panel fills composited properly,
+      which is the part everyone gets wrong — and checks every interactive element against
+      <code>--hit-min</code>. Exits non-zero on failure.
+    </p>
+  </section>
+
+  <section>
+    <h2>The rules</h2>
+    <p>Eight of them, each with the reason it exists, in <a href="conventions.md">conventions.md</a>. The short version:</p>
+    <ol>
+      <li>No raw colours or pixel values in a mockup — only tokens.</li>
+      <li>Nothing interactive below <code>--hit-min</code> (44px), <code>--hit-xr</code> (64px) for ray or field use.</li>
+      <li>Panels are translucent; anything floating over the scene gets its own backing.</li>
+      <li>State is an ARIA attribute, not a class.</li>
+      <li>Written twice means it belongs in <code>components.css</code>, with a specimen.</li>
+      <li>Every mockup states its intent and its open questions.</li>
+      <li>Contrast is measured, not eyeballed.</li>
+      <li>Mockups are self-contained and build-free.</li>
+    </ol>
+  </section>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Field AR — Layer Control — Viewport Universal UI</title>
+
+<link rel="stylesheet" href="../../system/tokens.css">
+<link rel="stylesheet" href="../../system/base.css">
+<link rel="stylesheet" href="../../system/components.css">
+<link rel="stylesheet" href="../../system/stage.css">
+
+<style>
+  /* Layout for this mockup only. */
+  .ar-layout {
+    display: grid;
+    grid-template-columns: var(--toolbar-thickness) 1fr var(--panel-width-md);
+    gap: var(--space-4);
+    padding: var(--space-4);
+    width: 100%;
+  }
+
+  .ar-rail { align-self: start; }
+
+  .ar-centre {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding-block: var(--space-2);
+  }
+
+  .ar-readouts {
+    display: flex;
+    gap: var(--space-6);
+    padding: var(--space-3) var(--space-5);
+    background: var(--surface-glass);
+    backdrop-filter: blur(var(--blur-panel));
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-2);
+  }
+
+  .ar-side { align-self: stretch; max-height: 100%; }
+
+  /* Badges over a live camera feed need their own backing — the scene behind
+     them is uncontrolled and can be any brightness. */
+  .ar-status {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+    background: var(--surface-glass);
+    backdrop-filter: blur(var(--blur-panel));
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-2);
+  }
+
+  /* Panel body becomes a column so the opacity control can sit against the
+     bottom of the panel rather than floating under a short layer list. */
+  .ar-side .vp-panel__body { display: flex; flex-direction: column; }
+
+  .ar-opacity {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-3) var(--space-2) var(--space-1);
+    border-top: 1px solid var(--border-subtle);
+    margin-top: auto;
+  }
+</style>
+</head>
+
+<body>
+<main class="stage">
+
+  <header class="stage__header">
+    <h1 class="stage__title">Field AR — Layer Control</h1>
+    <p class="stage__meta">Target: iPad Pro landscape · Status: reference · Updated 2026-09-17</p>
+  </header>
+
+  <section class="stage__notes">
+    <h2>Intent</h2>
+    <p>
+      Reference example for the system: a one-handed field layout where the operator holds the
+      iPad with one hand and drives everything with the other thumb. Tool rail on the left,
+      layer tree on the right, telemetry centred and out of the way.
+    </p>
+    <h2>Why it is built this way</h2>
+    <ul>
+      <li>Every control is at least <code>--hit-xr</code> (64px) — this is used in gloves, in sun, on uneven ground.</li>
+      <li>Panels are translucent so the operator never loses sight of the site behind the UI.</li>
+      <li>Layer visibility is a toggle, not a tap-to-select, so no state is ambiguous at a glance.</li>
+    </ul>
+    <h2>Open questions</h2>
+    <ul>
+      <li>Does the tool rail belong on the left, or should it mirror for left-handed operators?</li>
+      <li>Is a flat layer tree enough, or do sites routinely need more than two levels of folder?</li>
+    </ul>
+  </section>
+
+  <div class="device device--ipad-landscape" data-device="iPad Pro · landscape · 1366×1024">
+    <div class="device__scene"></div>
+    <div class="device__ui">
+      <div class="ar-layout">
+
+        <!-- ---- Tool rail ---- -->
+        <div class="vp-toolbar vp-toolbar--vertical ar-rail">
+          <button class="vp-tool" type="button" aria-pressed="true" aria-label="Pan">
+            <svg class="vp-tool__glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3v18M3 12h18"/><path d="m8 7 4-4 4 4M8 17l4 4 4-4M7 8l-4 4 4 4M17 8l4 4-4 4"/>
+            </svg>
+          </button>
+          <button class="vp-tool" type="button" aria-pressed="false" aria-label="Measure">
+            <svg class="vp-tool__glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m3 17 14-14 4 4L7 21z"/><path d="M8 8l2 2M11 5l2 2M5 11l2 2"/>
+            </svg>
+          </button>
+          <button class="vp-tool" type="button" aria-pressed="false" aria-label="Place marker">
+            <svg class="vp-tool__glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>
+            </svg>
+          </button>
+          <div class="vp-toolbar__divider"></div>
+          <button class="vp-tool" type="button" aria-pressed="false" aria-label="Section cut">
+            <svg class="vp-tool__glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 12h18"/><path d="M6 6h12v12H6z" stroke-dasharray="3 3"/>
+            </svg>
+          </button>
+          <button class="vp-tool" type="button" aria-pressed="false" aria-label="Capture">
+            <svg class="vp-tool__glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- ---- Centre: telemetry + primary action ---- -->
+        <div class="ar-centre">
+          <div class="ar-readouts">
+            <div class="vp-readout">
+              <span class="vp-readout__label">Easting</span>
+              <span class="vp-readout__value">512 884.21</span>
+            </div>
+            <div class="vp-readout">
+              <span class="vp-readout__label">Northing</span>
+              <span class="vp-readout__value">7 452 019.65</span>
+            </div>
+            <div class="vp-readout">
+              <span class="vp-readout__label">Elevation</span>
+              <span class="vp-readout__value">418.3 m</span>
+            </div>
+            <div class="vp-readout">
+              <span class="vp-readout__label">Anchor</span>
+              <span class="vp-readout__value">±0.08 m</span>
+            </div>
+          </div>
+
+          <div class="ar-status">
+            <span class="vp-badge vp-badge--positive">GNSS fixed</span>
+            <span class="vp-badge">12 sats</span>
+            <button class="vp-btn vp-btn--primary vp-btn--xr" type="button">Re-anchor to site</button>
+          </div>
+        </div>
+
+        <!-- ---- Layer panel ---- -->
+        <aside class="vp-panel ar-side">
+          <div class="vp-panel__header">
+            <h2 class="vp-panel__title">Layers</h2>
+            <span class="u-spacer"></span>
+            <span class="vp-badge vp-badge--accent">6 on</span>
+          </div>
+
+          <div class="vp-panel__body vp-panel__body--tight u-scroll">
+            <div class="vp-tree" role="tree" aria-label="Site layers" style="flex:0 0 auto">
+
+              <div class="vp-tree__row" role="treeitem" aria-expanded="true" style="--depth:0">
+                <span class="vp-tree__twisty" aria-hidden="true">
+                  <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 3 5 5-5 5"/></svg>
+                </span>
+                <span class="u-grow u-truncate">Proposed footprint</span>
+                <span class="vp-tree__count">4</span>
+              </div>
+
+              <div class="vp-tree__row" role="treeitem" aria-selected="true" style="--depth:1">
+                <span class="vp-tree__swatch" style="background:#d9453f"></span>
+                <span class="u-grow u-truncate">Pit outline — Stage 2</span>
+              </div>
+              <div class="vp-tree__row" role="treeitem" style="--depth:1">
+                <span class="vp-tree__swatch" style="background:#d98a10"></span>
+                <span class="u-grow u-truncate">Waste dump</span>
+              </div>
+              <div class="vp-tree__row" role="treeitem" style="--depth:1">
+                <span class="vp-tree__swatch" style="background:#1e88ff"></span>
+                <span class="u-grow u-truncate">Haul roads</span>
+              </div>
+              <div class="vp-tree__row" role="treeitem" style="--depth:1">
+                <span class="vp-tree__swatch" style="background:#7a8699"></span>
+                <span class="u-grow u-truncate">Infrastructure</span>
+              </div>
+
+              <div class="vp-tree__row" role="treeitem" aria-expanded="true" style="--depth:0">
+                <span class="vp-tree__twisty" aria-hidden="true">
+                  <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 3 5 5-5 5"/></svg>
+                </span>
+                <span class="u-grow u-truncate">Heritage &amp; environment</span>
+                <span class="vp-tree__count">2</span>
+              </div>
+
+              <div class="vp-tree__row" role="treeitem" style="--depth:1">
+                <span class="vp-tree__swatch" style="background:#1f9d63"></span>
+                <span class="u-grow u-truncate">Vegetation survey</span>
+              </div>
+              <div class="vp-tree__row" role="treeitem" style="--depth:1">
+                <span class="vp-tree__swatch" style="background:#8cc3ff"></span>
+                <span class="u-grow u-truncate">Watercourses</span>
+              </div>
+
+              <div class="vp-tree__row" role="treeitem" style="--depth:0">
+                <span class="vp-tree__twisty" aria-hidden="true"></span>
+                <span class="u-grow u-truncate">Existing survey</span>
+                <span class="vp-tree__count">9</span>
+              </div>
+
+            </div>
+
+            <div class="ar-opacity">
+              <label class="vp-field__label" for="opacity">Overlay opacity</label>
+              <input class="vp-slider" id="opacity" type="range" min="0" max="100" value="72">
+            </div>
+          </div>
+
+          <div class="vp-panel__footer">
+            <label class="vp-toggle">
+              <input type="checkbox" checked>
+              <span class="vp-toggle__track"><span class="vp-toggle__thumb"></span></span>
+              Occlusion
+            </label>
+            <span class="u-spacer"></span>
+            <button class="vp-btn vp-btn--ghost" type="button">Reset</button>
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script src="../../system/stage.js" defer></script>
+</body>
+</html>

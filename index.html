@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Viewport Universal UI</title>
+
+<link rel="stylesheet" href="system/tokens.css">
+<link rel="stylesheet" href="system/base.css">
+<link rel="stylesheet" href="system/components.css">
+
+<style>
+  body { padding: var(--space-7) var(--space-5); }
+  .wrap { max-width: var(--content-max); margin-inline: auto; display: flex; flex-direction: column; gap: var(--space-6); }
+  .hero { display: flex; flex-direction: column; gap: var(--space-2); }
+  .hero p { color: var(--text-secondary); max-width: 62ch; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--space-4); }
+  .card {
+    display: flex; flex-direction: column; gap: var(--space-3);
+    padding: var(--space-4);
+    background: var(--surface-1);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    text-decoration: none; color: inherit;
+    transition: border-color var(--duration-fast) var(--ease-standard),
+                transform var(--duration-fast) var(--ease-standard);
+  }
+  .card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+  .card__title { font-size: var(--text-lg); font-weight: var(--weight-semibold); }
+  .card__summary { font-size: var(--text-sm); color: var(--text-secondary); }
+  .card__meta { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: auto; }
+  .empty { padding: var(--space-6); border: 1px dashed var(--border-default); border-radius: var(--radius-lg); color: var(--text-muted); text-align: center; }
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <h1>Viewport Universal UI</h1>
+    <p>
+      Design system and mockup workshop for Viewport XR. Every mockup below is a self-contained
+      HTML file built from the shared tokens and components — open one, or open the
+      <a href="system/preview.html">system preview</a> to see the library itself.
+    </p>
+    <div class="u-row" style="margin-top:var(--space-2)">
+      <a class="vp-btn vp-btn--primary" href="system/preview.html">System preview</a>
+      <a class="vp-btn vp-btn--secondary" href="docs/how-to-use.html">How to use</a>
+    </div>
+  </header>
+
+  <section class="u-stack">
+    <h2>Mockups</h2>
+    <div class="grid" id="grid"></div>
+  </section>
+
+</div>
+
+<script src="gallery/manifest.js"></script>
+<script>
+  const STATUS_TONE = {
+    draft: "vp-badge--caution",
+    review: "vp-badge--accent",
+    approved: "vp-badge--positive",
+    reference: "vp-badge--accent",
+    superseded: ""
+  };
+
+  const mockups = Array.isArray(window.VP_MOCKUPS) ? window.VP_MOCKUPS : [];
+  const grid = document.getElementById("grid");
+
+  if (mockups.length === 0) {
+    grid.outerHTML =
+      '<p class="empty">No mockups yet. Copy <code>templates/mockup.html</code> into ' +
+      '<code>mockups/&lt;slug&gt;/index.html</code>, or run <code>node tools/new-mockup.mjs "My screen"</code>.</p>';
+  } else {
+    grid.innerHTML = mockups.map((m) => `
+      <a class="card" href="mockups/${m.slug}/index.html">
+        <span class="card__title">${m.title}</span>
+        <span class="card__summary">${m.summary || ""}</span>
+        <span class="card__meta">
+          <span class="vp-badge ${STATUS_TONE[m.status] ?? ""}">${m.status || "draft"}</span>
+          ${m.target ? `<span class="vp-badge">${m.target}</span>` : ""}
+          ${m.updated ? `<span class="vp-badge">${m.updated}</span>` : ""}
+        </span>
+      </a>`).join("");
+  }
+</script>
+</body>
+</html>

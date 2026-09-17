@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TITLE — Viewport Universal UI</title>
+
+<!-- Path is ../../ because mockups live at mockups/<slug>/index.html -->
+<link rel="stylesheet" href="../../system/tokens.css">
+<link rel="stylesheet" href="../../system/base.css">
+<link rel="stylesheet" href="../../system/components.css">
+<link rel="stylesheet" href="../../system/stage.css">
+
+<style>
+  /* Layout specific to THIS mockup only.
+     Anything reusable belongs in system/components.css instead — if you write
+     the same rule in a second mockup, that is the signal to promote it. */
+</style>
+</head>
+
+<body>
+<main class="stage">
+
+  <header class="stage__header">
+    <h1 class="stage__title">TITLE</h1>
+    <p class="stage__meta">Target: DEVICE · Status: draft · Updated YYYY-MM-DD</p>
+  </header>
+
+  <!-- The control bar is injected here by stage.js -->
+
+  <section class="stage__notes">
+    <h2>Intent</h2>
+    <p>What question is this mockup answering? One or two sentences.</p>
+    <h2>Open questions</h2>
+    <ul>
+      <li>Anything undecided that a reviewer should weigh in on.</li>
+    </ul>
+  </section>
+
+  <div class="device device--ipad-landscape" data-device="iPad Pro · landscape · 1366×1024">
+    <div class="device__scene"></div>
+    <div class="device__ui">
+
+      <!-- ===== Mockup starts here ===== -->
+
+      <!-- ===== Mockup ends here ===== -->
+
+    </div>
+  </div>
+
+</main>
+
+<script src="../../system/stage.js" defer></script>
+</body>
+</html>
